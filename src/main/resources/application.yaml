@@ -1,0 +1,44 @@
+server:
+  port: 8080
+  tomcat:
+    accesslog:
+      enabled: true
+      directory: D:\\Study\\FinTech Courses\\AP Project\\AppliedProject\\log\\fast-quant-analysis
+      suffix: .log
+      prefix: access_log
+      pattern: common
+spring:
+  application:
+    name: fastQuantAnalysis
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/fast_quant_analysis?useSSL=false&serverTimezone=UTC
+    username: root
+    password: nnABC102298HSY
+  jackson:
+    default-property-inclusion: non_null
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 10
+          min-idle: 1
+          time-between-eviction-runs: 10s
+mybatis-plus:
+  type-aliases-package: org.imperial.fastquantanalysis.entity
+logging:
+  level:
+    org.imperial.fastquantanalysis: debug
+  file:
+    name: D:\\Study\\FinTech Courses\\ Project\\AppliedProject\\log\\fast-quant-analysis\\fastQuantAnalysis.log
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    operations-sorter: method
