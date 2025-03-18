@@ -15,9 +15,9 @@ import org.springframework.http.ResponseEntity;
  */
 public interface IUserService extends IService<User> {
 
-    ResponseEntity<?> updateUserDetails(UserDetailUpdateRequestDTO userDetailUpdateRequestDTO, HttpSession session);
-
     ResponseEntity<?> sendCode(String emailId, HttpSession session);
 
     ResponseEntity<?> login(UserLoginFormDTO userLoginFormDTO, HttpSession session);
+
+    ResponseEntity<?> updateUserDetails(UserDetailUpdateRequestDTO userDetailUpdateRequestDTO, HttpSession session);
 }

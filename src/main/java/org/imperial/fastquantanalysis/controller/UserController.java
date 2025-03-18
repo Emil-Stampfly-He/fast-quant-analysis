@@ -8,7 +8,6 @@ import org.imperial.fastquantanalysis.dto.UserDetailUpdateRequestDTO;
 import org.imperial.fastquantanalysis.dto.UserLoginFormDTO;
 import org.imperial.fastquantanalysis.service.IUserService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,15 +27,16 @@ public class UserController {
 
     /**
      * Send verification code to user
-     * @param email_id email ID
+     * @param emailId email ID
      * @param session session
      * @return OK or fail message
+     * @postmantest passed
      */
-    @PostMapping("code")
+    @PostMapping("/code")
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Send code to user's email")
-    public ResponseEntity<?> sendCode(@RequestParam("email_id") String email_id, HttpSession session) {
-        return userService.sendCode(email_id, session);
+    public ResponseEntity<?> sendCode(@RequestParam("email_id") String emailId, HttpSession session) {
+        return userService.sendCode(emailId, session);
     }
 
     /**
@@ -44,8 +44,9 @@ public class UserController {
      * @param userLoginFormDTO user's log in detail, including email, verification code and password
      * @param session session
      * @return OK or fail message
+     * @postmantest
      */
-    @PostMapping("login")
+    @PostMapping("/login")
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Login with email ID and verification code")
     public ResponseEntity<?> login(@RequestBody UserLoginFormDTO userLoginFormDTO, HttpSession session) {
@@ -57,9 +58,10 @@ public class UserController {
      * @param userDetailUpdateRequestDTO user's detail, including name and birthday
      * @param session session
      * @return OK or fail message
+     * @postmantest
      * TODO unfinished
      */
-    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping("/update")
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Update profile details of logged-in user")
     public ResponseEntity<?> userDetailsUpdateHandler(

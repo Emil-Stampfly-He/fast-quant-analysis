@@ -5,6 +5,12 @@ import org.springframework.stereotype.Component;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * Generate random strings with length of 10
+ *
+ * @author Emil S. He
+ * @since 2025-03-17
+ */
 @Component
 public class RandomStringGenerator {
     private static final int NUMBER_OF_CHAR = 10;

@@ -10,19 +10,21 @@ import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.imperial.fastquantanalysis.dto.UserDetailUpdateRequestDTO;
 import org.imperial.fastquantanalysis.dto.UserLoginFormDTO;
-import org.imperial.fastquantanalysis.dto.UserWithOnlyImportantFieldsDTO;
+import org.imperial.fastquantanalysis.dto.UserForRedisHashDTO;
 import org.imperial.fastquantanalysis.mapper.UserMapper;
 import org.imperial.fastquantanalysis.service.IUserService;
 import org.imperial.fastquantanalysis.entity.User;
 import org.imperial.fastquantanalysis.util.RandomStringGenerator;
 import org.imperial.fastquantanalysis.util.RedisIdUtil;
 import org.imperial.fastquantanalysis.util.RegexUtils;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,8 +67,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // verification code length: 6
         String code = RandomUtil.randomNumbers(6);
 
-        // 4. Store verification code into Redis, TTL 5 min
-        stringRedisTemplate.opsForValue().set("login:code" + emailId, code, Duration.ofMinutes(5L));
+        // 4. Store verification code into Redis, TTL 1 hour
+        stringRedisTemplate.opsForValue().set("login:code:" + emailId, code, Duration.ofHours(1L));
 
         // 5. Send verification code
         log.debug("Verification code: " + code);
@@ -92,7 +94,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 3. Check verification code
         // 3.1 Get verification code from Redis
         String cacheCode = Objects.requireNonNull(stringRedisTemplate.opsForValue()
-                        .get("login:code" + userLoginFormDTO.getEmailId())).replaceAll("\\x00\\x00", "");
+                        .get("login:code:" + userLoginFormDTO.getEmailId())).replaceAll("\\x00\\x00", "");
         String code = userLoginFormDTO.getCode();
 
         // 3.2 If not the same, return fail message
@@ -114,8 +116,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 7.1 Randomize token as for login token
         String token = UUID.randomUUID().toString(true);
         // 7.2 Transfer User to HashMap and store
-        UserWithOnlyImportantFieldsDTO userWithOnlyImportantFieldsDTO = BeanUtil.copyProperties(user, UserWithOnlyImportantFieldsDTO.class);
-        Map<String, Object> userMap = BeanUtil.beanToMap(userWithOnlyImportantFieldsDTO, new HashMap<>(),
+        UserForRedisHashDTO userForRedisHashDTO = BeanUtil.copyProperties(user, UserForRedisHashDTO.class);
+        Map<String, Object> userMap = BeanUtil.beanToMap(userForRedisHashDTO, new HashMap<>(),
                 CopyOptions.create()
                         .setIgnoreNullValue(true)
                         .setFieldValueEditor((fieldName, fieldValue) ->
@@ -139,7 +141,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     public ResponseEntity<?> updateUserDetails(UserDetailUpdateRequestDTO userDetailUpdateRequestDTO, HttpSession session) {
         // 1. Get the user from token
 
-
         // 2. If user does not exist, return fail message
 
         // 3. Set the new details for userDetailUpdateRequestDTO
@@ -154,8 +155,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         User user = new User();
         user.setId(redisIdUtil.nextId(emailId));
         user.setEmailId(emailId);
-        user.setFirstName(randomStringGenerator.generateRandomString());
-        user.setLastName(randomStringGenerator.generateRandomString());
+        user.setPassword("123456"); // default password
+        user.setDateOfBirth(LocalDate.now()); // default date of birth
+        user.setFirstName(randomStringGenerator.generateRandomString()); // default first name
+        user.setLastName(randomStringGenerator.generateRandomString()); // default last name
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
 

@@ -3,7 +3,7 @@ package org.imperial.fastquantanalysis.dto;
 import lombok.Data;
 
 @Data
-public class UserWithOnlyImportantFieldsDTO {
+public class UserForRedisHashDTO {
 
     private String id;
 
