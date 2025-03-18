@@ -6,18 +6,16 @@ import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.imperial.fastquantanalysis.dto.UserDetailUpdateRequestDTO;
 import org.imperial.fastquantanalysis.dto.UserLoginFormDTO;
-import org.imperial.fastquantanalysis.dto.UserForRedisHashDTO;
+import org.imperial.fastquantanalysis.dto.UserWithOnlyImportantInfoDTO;
 import org.imperial.fastquantanalysis.mapper.UserMapper;
 import org.imperial.fastquantanalysis.service.IUserService;
 import org.imperial.fastquantanalysis.entity.User;
-import org.imperial.fastquantanalysis.util.RandomStringGenerator;
-import org.imperial.fastquantanalysis.util.RedisIdUtil;
-import org.imperial.fastquantanalysis.util.RegexUtils;
-import org.springframework.data.redis.core.ScanOptions;
+import org.imperial.fastquantanalysis.util.*;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +47,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Resource
     private RandomStringGenerator randomStringGenerator;
 
+    @Resource
+    private UserContext userContext;
+
     /**
      * Send code to user's email
      * @param emailId user's email
@@ -67,11 +68,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // verification code length: 6
         String code = RandomUtil.randomNumbers(6);
 
-        // 4. Store verification code into Redis, TTL 1 hour
-        stringRedisTemplate.opsForValue().set("login:code:" + emailId, code, Duration.ofHours(1L));
+        // 4. Store verification code into Redis, TTL 24 hours
+        stringRedisTemplate.opsForValue().set("login:code:" + emailId, code, Duration.ofHours(24L));
 
         // 5. Send verification code
-        log.debug("Verification code: " + code);
+        log.debug("Verification code: {}", code);
 
         // 6. Return OK
         return ResponseEntity.status(HttpStatus.OK).body(code);
@@ -79,7 +80,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     /**
      * User log in
-     * @param userLoginFormDTO user's log in detail, including email, verification code and passwo
+     * @param userLoginFormDTO user's log in detail, including email, verification code and password
      * @param session session
      * @return OK or fail message
      */
@@ -116,8 +117,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 7.1 Randomize token as for login token
         String token = UUID.randomUUID().toString(true);
         // 7.2 Transfer User to HashMap and store
-        UserForRedisHashDTO userForRedisHashDTO = BeanUtil.copyProperties(user, UserForRedisHashDTO.class);
-        Map<String, Object> userMap = BeanUtil.beanToMap(userForRedisHashDTO, new HashMap<>(),
+        UserWithOnlyImportantInfoDTO userWithOnlyImportantInfoDTO = BeanUtil.copyProperties(user, UserWithOnlyImportantInfoDTO.class);
+        Map<String, Object> userMap = BeanUtil.beanToMap(userWithOnlyImportantInfoDTO, new HashMap<>(),
                 CopyOptions.create()
                         .setIgnoreNullValue(true)
                         .setFieldValueEditor((fieldName, fieldValue) ->
@@ -138,14 +139,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
      * @return OK or fail message
      */
     @Override
-    public ResponseEntity<?> updateUserDetails(UserDetailUpdateRequestDTO userDetailUpdateRequestDTO, HttpSession session) {
-        // 1. Get the user from token
+    public ResponseEntity<?> updateUserDetails(UserDetailUpdateRequestDTO userDetailUpdateRequestDTO, HttpSession session,
+                                               HttpServletRequest request) {
+        // 1. Get current signed-in user
+        UserWithOnlyImportantInfoDTO userWithOnlyImportantInfoDTO = userContext.getUserFromRequest(request);
+        if (userWithOnlyImportantInfoDTO == null) {
+            userWithOnlyImportantInfoDTO = (UserWithOnlyImportantInfoDTO) session.getAttribute("user");
+            if (userWithOnlyImportantInfoDTO == null) {
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("User does not exist");
+            }
+        }
+        String id = userWithOnlyImportantInfoDTO.getId();
 
         // 2. If user does not exist, return fail message
+        // SELECT * FROM user WHERE id = ?
+        User user = query().eq("id", id).one();
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("User not found");
+        }
 
         // 3. Set the new details for userDetailUpdateRequestDTO
+        user.setFirstName(userDetailUpdateRequestDTO.getFirstName());
+        user.setLastName(userDetailUpdateRequestDTO.getLastName());
+        user.setDateOfBirth(userDetailUpdateRequestDTO.getBirthDate());
 
-        // 4. Save this user
+        // 4. Update this user
+        updateById(user);
 
         // 5. Return OK message
         return ResponseEntity.ok("User updated successfully");

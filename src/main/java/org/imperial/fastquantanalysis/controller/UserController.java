@@ -2,6 +2,7 @@ package org.imperial.fastquantanalysis.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.imperial.fastquantanalysis.dto.UserDetailUpdateRequestDTO;
@@ -44,7 +45,7 @@ public class UserController {
      * @param userLoginFormDTO user's log in detail, including email, verification code and password
      * @param session session
      * @return OK or fail message
-     * @postmantest
+     * @postmantest passed
      */
     @PostMapping("/login")
     @ResponseStatus(value = HttpStatus.OK)
@@ -55,20 +56,20 @@ public class UserController {
 
     /**
      * Update user's detail
-     * @param userDetailUpdateRequestDTO user's detail, including name and birthday
-     * @param session session
+     * @param userDetailUpdateRequestDTO userDetailUpdateRequestDTO user's detail, including name and birthday
+     * @param session session session
+     * @param request request
      * @return OK or fail message
-     * @postmantest
-     * TODO unfinished
+     * @postmantest passed
      */
     @PutMapping("/update")
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Update profile details of logged-in user")
     public ResponseEntity<?> userDetailsUpdateHandler(
             @RequestBody UserDetailUpdateRequestDTO userDetailUpdateRequestDTO,
-            HttpSession session
+            HttpSession session, HttpServletRequest request
     ) {
-        return userService.updateUserDetails(userDetailUpdateRequestDTO, session);
+        return userService.updateUserDetails(userDetailUpdateRequestDTO, session, request);
     }
 
 
