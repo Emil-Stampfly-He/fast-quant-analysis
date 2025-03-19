@@ -10,7 +10,7 @@ class KotlinDependenciesTest {
     @Test
     fun testJacksonKotlinModule() {
         val mapper = jacksonObjectMapper()
-        val person = Person("Emil", 23);
+        val person = Person("Emil", 23)
         val json = mapper.writeValueAsString(person)
         val personFromJson = mapper.readValue(json, Person::class.java)
         assertEquals(person, personFromJson)
