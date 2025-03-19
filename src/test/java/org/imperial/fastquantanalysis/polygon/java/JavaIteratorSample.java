@@ -1,9 +1,12 @@
-package org.imperial.fastquantanalysis.polygon;
+package org.imperial.fastquantanalysis.polygon.java;
 
 import io.polygon.kotlin.sdk.rest.*;
 import io.polygon.kotlin.sdk.rest.reference.SupportedTickersParameters;
 import io.polygon.kotlin.sdk.rest.reference.SupportedTickersParametersBuilder;
 
+/**
+ * Credit to <a href="https://github.com/polygon-io/client-jvm">https://github.com/polygon-io/client-jvm</a>
+ */
 public class JavaIteratorSample {
 
     public static void IteratorSample(PolygonRestClient client) {

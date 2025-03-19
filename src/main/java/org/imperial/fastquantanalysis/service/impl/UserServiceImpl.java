@@ -28,6 +28,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static org.imperial.fastquantanalysis.constant.RedisKey.LOGIN_CODE_;
+import static org.imperial.fastquantanalysis.constant.RedisKey.LOGIN_USER_;
+
 /**
  * Service implementation class
  *
@@ -69,7 +72,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         String code = RandomUtil.randomNumbers(6);
 
         // 4. Store verification code into Redis, TTL 24 hours
-        stringRedisTemplate.opsForValue().set("login:code:" + emailId, code, Duration.ofHours(24L));
+        stringRedisTemplate.opsForValue().set(LOGIN_CODE_ + emailId, code, Duration.ofHours(24L));
 
         // 5. Send verification code
         log.debug("Verification code: {}", code);
@@ -95,7 +98,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 3. Check verification code
         // 3.1 Get verification code from Redis
         String cacheCode = Objects.requireNonNull(stringRedisTemplate.opsForValue()
-                        .get("login:code:" + userLoginFormDTO.getEmailId())).replaceAll("\\x00\\x00", "");
+                        .get(LOGIN_CODE_ + userLoginFormDTO.getEmailId())).replaceAll("\\x00\\x00", "");
         String code = userLoginFormDTO.getCode();
 
         // 3.2 If not the same, return fail message
@@ -124,9 +127,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
                         .setFieldValueEditor((fieldName, fieldValue) ->
                                 fieldValue.toString()));
         // 7.3 Store
-        stringRedisTemplate.opsForHash().putAll("login:user:" + token, userMap);
+        stringRedisTemplate.opsForHash().putAll(LOGIN_USER_ + token, userMap);
         // 7.4 Set TTL for token: 10 days
-        stringRedisTemplate.expire("login:user:" + token, Duration.ofDays(10L));
+        stringRedisTemplate.expire(LOGIN_USER_ + token, Duration.ofDays(10L));
 
         // 8. Return OK with token
         return ResponseEntity.status(HttpStatus.OK).body(token);

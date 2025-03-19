@@ -1,4 +1,4 @@
-package org.imperial.fastquantanalysis.polygon;
+package org.imperial.fastquantanalysis.polygon.java;
 
 import io.polygon.kotlin.sdk.rest.*;
 import io.polygon.kotlin.sdk.rest.experimental.FinancialsParameters;
@@ -9,12 +9,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
-public class PolygonExample {
+import static org.imperial.fastquantanalysis.constant.PolygonConstant.POLYGON_API_KEY;
+
+/**
+ * Credit to <a href="https://github.com/polygon-io/client-jvm">https://github.com/polygon-io/client-jvm</a>
+ */
+public class JavaPolygonExample {
     public static void main(String[] args) throws InterruptedException {
-        String polygonKey = "3SZERPX5CrTjlZw2dcAPW3fHu83V70iD";
-        PolygonRestClient client = new PolygonRestClient(polygonKey);
+        PolygonRestClient client = new PolygonRestClient(POLYGON_API_KEY);
 
         System.out.println("Blocking for markets...");
         final MarketsDTO markets = client.getReferenceClient().getSupportedMarketsBlocking();
