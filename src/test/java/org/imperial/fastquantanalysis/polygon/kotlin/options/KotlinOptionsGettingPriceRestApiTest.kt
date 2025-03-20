@@ -15,5 +15,5 @@ fun main() {
         httpClientProvider = okHttpClientProvider
     )
 
-    optionsAggregatesBars(polygonClient)
+    // optionsAggregatesBars(polygonClient)
 }

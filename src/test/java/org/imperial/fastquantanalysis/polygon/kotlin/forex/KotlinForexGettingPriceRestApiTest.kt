@@ -14,7 +14,7 @@ fun main() {
         httpClientProvider = org.imperial.fastquantanalysis.polygon.kotlin.crypto.okHttpClientProvider
     )
 
-    forexAggregatesBars(polygonClient)
+    // forexAggregatesBars(polygonClient) // Unauthorized
 
 
 }

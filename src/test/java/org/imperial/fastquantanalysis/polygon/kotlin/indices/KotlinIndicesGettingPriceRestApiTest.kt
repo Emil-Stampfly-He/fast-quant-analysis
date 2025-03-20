@@ -35,7 +35,7 @@ fun main() {
         httpClientProvider = org.imperial.fastquantanalysis.polygon.kotlin.crypto.okHttpClientProvider
     )
 
-    indicesAggregatesBars(polygonClient) // Unauthorized, need to upgrade the plan
+    // indicesAggregatesBars(polygonClient) // Unauthorized, need to upgrade the plan
 
 
 }
