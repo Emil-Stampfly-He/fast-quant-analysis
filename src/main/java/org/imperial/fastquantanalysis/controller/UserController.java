@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Controller
+ * User controller
  *
  * @author Emil S. He
  * @since 2025-03-16
@@ -70,6 +70,17 @@ public class UserController {
             HttpSession session, HttpServletRequest request
     ) {
         return userService.updateUserDetails(userDetailUpdateRequestDTO, session, request);
+    }
+
+    /**
+     * Get user's info
+     * @return OK of fail message
+     */
+    @GetMapping("/me")
+    @ResponseStatus(value = HttpStatus.OK)
+    @Operation(summary = "Display user's info")
+    public ResponseEntity<?> me(HttpServletRequest request) {
+        return userService.me(request);
     }
 
 

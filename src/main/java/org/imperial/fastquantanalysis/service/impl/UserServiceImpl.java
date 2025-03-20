@@ -32,7 +32,7 @@ import static org.imperial.fastquantanalysis.constant.RedisKey.LOGIN_CODE_;
 import static org.imperial.fastquantanalysis.constant.RedisKey.LOGIN_USER_;
 
 /**
- * Service implementation class
+ * User service implementation class
  *
  * @author Emil S. He
  * @since 2025-03-16
@@ -171,6 +171,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
         // 5. Return OK message
         return ResponseEntity.ok("User updated successfully");
+    }
+
+    /**
+     * Get user's info
+     * @return OK of fail message
+     */
+    @Override
+    public ResponseEntity<?> me(HttpServletRequest request) {
+        UserWithOnlyImportantInfoDTO userWithOnlyImportantInfoDTO = userContext.getUserFromRequest(request);
+        if (userWithOnlyImportantInfoDTO == null) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("User does not log in");
+        }
+
+        return ResponseEntity.ok(userWithOnlyImportantInfoDTO);
     }
 
     private void createUserWithNewEmail(String emailId) {

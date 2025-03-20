@@ -9,7 +9,7 @@ import org.imperial.fastquantanalysis.entity.User;
 import org.springframework.http.ResponseEntity;
 
 /**
- * Service interface
+ * User service interface
  *
  * @author Emil S. He
  * @since 2025-03-16
@@ -22,4 +22,6 @@ public interface IUserService extends IService<User> {
 
     ResponseEntity<?> updateUserDetails(UserDetailUpdateRequestDTO userDetailUpdateRequestDTO,
                                         HttpSession session, HttpServletRequest request);
+
+    ResponseEntity<?> me(HttpServletRequest request);
 }

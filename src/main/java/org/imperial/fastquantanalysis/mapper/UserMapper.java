@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.imperial.fastquantanalysis.entity.User;
 
 /**
- * Mapper interface
+ * User mapper interface
  *
  * @author Emil S. He
  * @since 2025-03-16
