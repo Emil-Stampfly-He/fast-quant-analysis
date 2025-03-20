@@ -8,6 +8,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+/**
+ * User entity
+ *
+ * @author Emil S. He
+ * @since 2025-03-16
+ */
 @Data
 @TableName("users")
 public class User implements Serializable {

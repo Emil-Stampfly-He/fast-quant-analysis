@@ -2,12 +2,14 @@ package org.imperial.fastquantanalysis;
 
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.imperial.fastquantanalysis.entity.QuantStrategy;
 import org.imperial.fastquantanalysis.util.RandomStringGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,7 +39,16 @@ class FastQuantAnalysisApplicationTests {
         Map<Object, Object> map = stringRedisTemplate.opsForHash().entries(key);
 
         System.out.println(map);
+    }
 
+    @Test
+    void testConstructor() {
+        QuantStrategy quantStrategy = new QuantStrategy("id", "name",
+                LocalDateTime.now(), LocalDateTime.now(),
+                0.1, 0.2,
+                0.3, 0.4,
+                0.5, 10);
+        System.out.println(quantStrategy);
     }
 
 }

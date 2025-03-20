@@ -9,6 +9,6 @@ import org.imperial.fastquantanalysis.entity.QuantStrategy;
  * @author Emil S. He
  * @since 2025-03-20
  */
-public interface QuantAnalysisMapper extends BaseMapper<QuantStrategy> {
+public interface QuantAnalysisCryptoMapper extends BaseMapper<QuantStrategy> {
 
 }
