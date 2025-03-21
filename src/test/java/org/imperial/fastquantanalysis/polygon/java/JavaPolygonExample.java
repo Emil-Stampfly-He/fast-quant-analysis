@@ -63,6 +63,12 @@ public class JavaPolygonExample {
 //        websocketSample(polygonKey);
     }
 
+    public static void financialsSample(PolygonRestClient polygonRestClient) {
+        System.out.println("RDFN Financials");
+        FinancialsParameters params = new FinancialsParametersBuilder().ticker("RDFN").build();
+        System.out.println(polygonRestClient.getExperimentalClient().getFinancialsBlocking(params));
+    }
+
     public static void websocketSample(String polygonKey) {
         PolygonWebSocketClient client = new PolygonWebSocketClient(
                 polygonKey,
@@ -175,12 +181,6 @@ public class JavaPolygonExample {
                 .limit(1)
                 .build();
         System.out.println(polygonRestClient.getReferenceClient().getDividendsBlocking(cashAmountFilterParams));
-    }
-
-    public static void financialsSample(PolygonRestClient polygonRestClient) {
-        System.out.println("RDFN Financials");
-        FinancialsParameters params = new FinancialsParametersBuilder().ticker("RDFN").build();
-        System.out.println(polygonRestClient.getExperimentalClient().getFinancialsBlocking(params));
     }
 }
 
