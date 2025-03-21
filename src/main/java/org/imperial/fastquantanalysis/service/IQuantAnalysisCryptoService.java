@@ -1,6 +1,7 @@
 package org.imperial.fastquantanalysis.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.imperial.fastquantanalysis.dto.CryptoAggregatesDTO;
 import org.imperial.fastquantanalysis.entity.QuantStrategy;
 import org.springframework.http.ResponseEntity;
 
@@ -12,5 +13,5 @@ import org.springframework.http.ResponseEntity;
  */
 public interface IQuantAnalysisCryptoService extends IService<QuantStrategy> {
 
-    ResponseEntity<String> donchian();
+    ResponseEntity<String> donchian(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO);
 }

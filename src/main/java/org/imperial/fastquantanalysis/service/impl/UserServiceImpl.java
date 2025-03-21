@@ -62,7 +62,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public ResponseEntity<?> sendCode(String emailId, HttpSession session) {
         // 1. Check email ID
-        if (RegexUtils.isEmailInvalid(emailId)) {
+        if (RegexUtil.isEmailInvalid(emailId)) {
             // 2. If invalid, return fail message
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Email is invalid");
         }
@@ -90,7 +90,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public ResponseEntity<?> login(UserLoginFormDTO userLoginFormDTO, HttpSession session) {
         // 1. Check email
-        if (RegexUtils.isEmailInvalid(userLoginFormDTO.getEmailId())) {
+        if (RegexUtil.isEmailInvalid(userLoginFormDTO.getEmailId())) {
             // 2. If invalid, return fail message
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Email is invalid");
         }

@@ -8,7 +8,7 @@ import cn.hutool.core.util.StrUtil;
  * @author Emil S. He
  * @since 2025-03-17
  */
-public class RegexUtils {
+public class RegexUtil {
 
     public static final String EMAIL_REGEX = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$";
 

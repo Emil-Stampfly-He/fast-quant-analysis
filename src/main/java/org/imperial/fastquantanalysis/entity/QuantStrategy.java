@@ -4,9 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -17,9 +15,28 @@ import java.time.LocalDateTime;
  * @since 2025-03-20
  */
 @Data
-@AllArgsConstructor
 @TableName("quant_strategy")
 public class QuantStrategy {
+
+    public QuantStrategy() {}
+
+    // Kotlin cannot see lombok annotation @AllArgsConstructor, thus it cannot be used
+    public QuantStrategy(String strategyId, String strategyName,
+                         LocalDateTime startDate, LocalDateTime endDate,
+                         Double annualizedReturn, Double cumulativeReturn,
+                         Double maxDrawdown, Double volatility,
+                         Double sharpeRatio, Integer tradeCount) {
+        this.strategyId = strategyId;
+        this.strategyName = strategyName;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.annualizedReturn = annualizedReturn;
+        this.cumulativeReturn = cumulativeReturn;
+        this.maxDrawdown = maxDrawdown;
+        this.volatility = volatility;
+        this.sharpeRatio = sharpeRatio;
+        this.tradeCount = tradeCount;
+    }
 
     // Basic info about strategy
     @TableId(value = "strategy_id", type = IdType.ASSIGN_ID)
