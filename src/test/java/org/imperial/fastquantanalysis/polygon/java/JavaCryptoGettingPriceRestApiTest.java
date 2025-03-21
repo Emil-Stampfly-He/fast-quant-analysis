@@ -41,7 +41,7 @@ public class JavaCryptoGettingPriceRestApiTest {
 
     public static void main(String[] args) {
         PolygonRestClient polygonClient = new PolygonRestClient(
-                POLYGON_API_KEY,
+                POLYGON_API_KEY, // Will be changed to user's
                 getOkHttpClientProvider()
         );
 
