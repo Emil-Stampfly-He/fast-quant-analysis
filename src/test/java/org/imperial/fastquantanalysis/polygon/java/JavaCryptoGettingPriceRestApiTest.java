@@ -32,7 +32,7 @@ public class JavaCryptoGettingPriceRestApiTest {
         List<Double> closePrices = CryptoHttpClientUtil.getClosePrices("X:BTCUSD",
                 null,
                 Timespan.DAY,
-                LocalDate.of(2025, 2, 3),
+                LocalDate.of(2024, 2, 3),
                 LocalDate.of(2025,2,7),
                 null,
                 null,
@@ -49,7 +49,7 @@ public class JavaCryptoGettingPriceRestApiTest {
         AggregatesParameters idxParams = AggregatesParametersFactory.create(
                 "X:BTCUSD",   // ticker
                 Timespan.DAY.getValue(),        // timespan
-                "2025-02-03", // fromDate
+                "2024-02-03", // fromDate
                 "2025-02-07", // toDate
                 "asc"
         );

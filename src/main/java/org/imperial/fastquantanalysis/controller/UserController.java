@@ -75,6 +75,7 @@ public class UserController {
     /**
      * Get user's info
      * @return OK of fail message
+     * @postmantest untested
      */
     @GetMapping("/me")
     @ResponseStatus(value = HttpStatus.OK)

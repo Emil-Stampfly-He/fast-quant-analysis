@@ -13,5 +13,5 @@ import org.springframework.http.ResponseEntity;
  */
 public interface IQuantAnalysisCryptoService extends IService<QuantStrategy> {
 
-    ResponseEntity<String> donchian(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO);
+    ResponseEntity<?> donchian(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO, Integer windowSize);
 }

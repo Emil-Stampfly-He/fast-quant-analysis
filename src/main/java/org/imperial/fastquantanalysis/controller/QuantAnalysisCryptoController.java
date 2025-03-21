@@ -5,7 +5,6 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.imperial.fastquantanalysis.dto.CryptoAggregatesDTO;
 import org.imperial.fastquantanalysis.service.IQuantAnalysisCryptoService;
-import org.imperial.fastquantanalysis.service.impl.QuantAnalysisCryptoServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,15 +26,15 @@ public class QuantAnalysisCryptoController {
     /**
      * Donchian channel for crypto prices
      * @return OK or fail message
-     * @postmantest untested
-     * TODO Unfinished
+     * @postmantest passed
      */
-    @GetMapping("/donchian")
+    @PostMapping("/donchian")
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Donchian channel strategy for crypto prices")
-    public ResponseEntity<String> donchian(@RequestParam("polygon_api_key") String polygonApiKey,
-                                           @RequestBody CryptoAggregatesDTO cryptoAggregatesDTO) {
-        return quantAnalysisCryptoService.donchian(polygonApiKey, cryptoAggregatesDTO);
+    public ResponseEntity<?> donchian(@RequestParam("polygon_api_key") String polygonApiKey,
+                                           @RequestBody CryptoAggregatesDTO cryptoAggregatesDTO,
+                                           @RequestParam Integer windowSize) {
+        return quantAnalysisCryptoService.donchian(polygonApiKey, cryptoAggregatesDTO, windowSize);
     }
 
 }

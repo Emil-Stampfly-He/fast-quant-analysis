@@ -1,6 +1,5 @@
 package org.imperial.fastquantanalysis.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -8,7 +7,6 @@ import org.imperial.fastquantanalysis.constant.Sort;
 import org.imperial.fastquantanalysis.constant.Timespan;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 /**
  * All parameters required to get crypto data
@@ -48,7 +46,5 @@ public class CryptoAggregatesDTO {
             "desc will return results in descending order (newest at the top)")
     @NotBlank
     private Sort sort;
-
-
 
 }

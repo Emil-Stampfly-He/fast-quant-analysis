@@ -5,18 +5,20 @@ import io.polygon.kotlin.sdk.HttpClientProvider;
 import io.polygon.kotlin.sdk.rest.PolygonRestClient;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.imperial.fastquantanalysis.constant.Sort;
+import org.imperial.fastquantanalysis.constant.Timespan;
 import org.imperial.fastquantanalysis.dto.CryptoAggregatesDTO;
 import org.imperial.fastquantanalysis.entity.QuantStrategy;
 import org.imperial.fastquantanalysis.mapper.QuantAnalysisCryptoMapper;
 import org.imperial.fastquantanalysis.service.IQuantAnalysisCryptoService;
 import org.imperial.fastquantanalysis.strategy.CryptoStrategy;
+import org.imperial.fastquantanalysis.util.CryptoHttpClientUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-
-import static org.imperial.fastquantanalysis.util.CryptoHttpClientUtil.getOkHttpClientProvider;
 
 /**
  * Quant analysis service implementation class
@@ -32,33 +34,41 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
     private CryptoStrategy cryptoStrategy;
 
     /**
-     * Donchian channel for crypto prices
+     * Donchian channel strategy for crypto
+     * @param polygonApiKey user's Polygon.io API key
+     * @param cryptoAggregatesDTO cryptoAggregatesDTO
+     * @param windowSize lookback
      * @return OK or fail message
-     * @postmantest untested
-     * TODO Unfinished
      */
     @Override
-    public ResponseEntity<String> donchian(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO) {
+    public ResponseEntity<?> donchian(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO, Integer windowSize) {
         String tickerName = cryptoAggregatesDTO.getTickerName();
-        String timespan = cryptoAggregatesDTO.getTimespan().getValue();
+        Timespan timespan = cryptoAggregatesDTO.getTimespan();
         LocalDate fromDate = cryptoAggregatesDTO.getFromDate();
         LocalDate toDate = cryptoAggregatesDTO.getToDate();
-        String sort = cryptoAggregatesDTO.getSort().getValue();
+        Sort sort = cryptoAggregatesDTO.getSort();
         Long multiplier = cryptoAggregatesDTO.getMultiplier();
         Boolean unadjusted = cryptoAggregatesDTO.getUnadjusted();
         Long limit = cryptoAggregatesDTO.getLimit();
 
-        HttpClientProvider okHttpClientProvider = getOkHttpClientProvider();
+        HttpClientProvider okHttpClientProvider = CryptoHttpClientUtil.getOkHttpClientProvider();
         PolygonRestClient polygonRestClient = new PolygonRestClient(
                 polygonApiKey,
                 okHttpClientProvider
         );
 
-        List<Double> closePrices = null;
+        List<Double> closePrices = CryptoHttpClientUtil.getClosePrices(
+                tickerName, multiplier,
+                timespan, fromDate, toDate,
+                unadjusted, limit, sort,
+                polygonRestClient
+        );
 
+        QuantStrategy quantStrategy = cryptoStrategy.donchianChannel(closePrices, windowSize);
+        quantStrategy.setStartDate(fromDate.atStartOfDay());
+        quantStrategy.setEndDate(toDate.atStartOfDay());
+        save(quantStrategy);
 
-        return null;
+        return ResponseEntity.ok(quantStrategy);
     }
-
-
 }

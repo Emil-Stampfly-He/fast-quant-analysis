@@ -92,6 +92,7 @@ public class CryptoHttpClientUtil {
         });
 
         replaceNullWithPrevious(closePrices);
+        log.info("Close prices: {}", closePrices);
 
         return closePrices;
     }
