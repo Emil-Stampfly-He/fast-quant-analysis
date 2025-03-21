@@ -1,5 +1,13 @@
 package org.imperial.fastquantanalysis.constant;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
+/**
+ * 2 possible values of param sort
+ *
+ * @author Emil S. He
+ * @since 2025-03-20
+ */
 public enum Sort {
 
     ASC("asc"),
@@ -11,7 +19,8 @@ public enum Sort {
         this.value = value;
     }
 
-    private String getValue() {
+    @JsonValue
+    public String getValue() {
         return value;
     }
 }

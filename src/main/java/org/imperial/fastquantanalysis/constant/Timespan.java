@@ -1,5 +1,13 @@
 package org.imperial.fastquantanalysis.constant;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
+/**
+ * 8 possible values of param timespan
+ *
+ * @author Emil S. He
+ * @since 2025-03-20
+ */
 public enum Timespan {
 
     SECOND("second"),
@@ -17,7 +25,8 @@ public enum Timespan {
         this.value = value;
     }
 
-    private String getValue() {
+    @JsonValue
+    public String getValue() {
         return value;
     }
 }

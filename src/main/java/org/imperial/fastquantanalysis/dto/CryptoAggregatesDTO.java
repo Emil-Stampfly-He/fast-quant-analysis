@@ -1,32 +1,54 @@
 package org.imperial.fastquantanalysis.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.imperial.fastquantanalysis.constant.Sort;
 import org.imperial.fastquantanalysis.constant.Timespan;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * All parameters required to get crypto data
+ *
+ * @author Emil S. He
+ * @since 2025-03-20
+ */
 @Data
 public class CryptoAggregatesDTO {
 
     @Schema(description = "ticker name")
+    @NotBlank
     private String tickerName;
 
+    @Schema(description = "the size of the timespan multiplier")
+    private Long multiplier; // default value: 1
+
     @Schema(description = "timespan")
+    @NotBlank
     private Timespan timespan;
 
     @Schema(description = "the starting date of strategy")
-    private LocalDateTime fromDate;
+    @NotBlank
+    private LocalDate fromDate;
 
     @Schema(description = "the ending date of strategy")
-    private LocalDateTime toDate;
+    @NotBlank
+    private LocalDate toDate;
+
+    @Schema(description = "whether or not the results are adjusted for splits")
+    private Boolean unadjusted; // default value: false
+
+    @Schema(description = "the number of base aggregates queried to create the result")
+    private Long limit; // default value: 50000
 
     @Schema(description = "asc will return results in ascending order (oldest at the top), " +
             "desc will return results in descending order (newest at the top)")
+    @NotBlank
     private Sort sort;
 
-    @Schema(description = "the number of base aggregates queried to create the result")
-    private Integer limit;
+
 
 }
