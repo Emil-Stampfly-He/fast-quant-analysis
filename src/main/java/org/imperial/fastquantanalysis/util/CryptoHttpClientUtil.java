@@ -2,6 +2,7 @@ package org.imperial.fastquantanalysis.util;
 
 import io.polygon.kotlin.sdk.DefaultOkHttpClientProvider;
 import io.polygon.kotlin.sdk.HttpClientProvider;
+import io.polygon.kotlin.sdk.rest.AggregateDTO;
 import io.polygon.kotlin.sdk.rest.AggregatesDTO;
 import io.polygon.kotlin.sdk.rest.AggregatesParameters;
 import io.polygon.kotlin.sdk.rest.PolygonRestClient;
@@ -12,12 +13,15 @@ import org.imperial.fastquantanalysis.constant.Sort;
 import org.imperial.fastquantanalysis.constant.Timespan;
 import org.imperial.fastquantanalysis.factory.AggregatesParametersFactory;
 import org.jetbrains.annotations.NotNull;
+import org.ta4j.core.Bar;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Various methods about getting crypto prices
@@ -95,6 +99,99 @@ public class CryptoHttpClientUtil {
         log.info("Close prices: {}", closePrices);
 
         return closePrices;
+    }
+
+    /**
+     * Get crypto bar prices and volume, which contains open, close, high, low prices
+     * and transaction volume
+     * @param tickerName ticker name
+     * @param multiplier multiplier, default value: 1
+     * @param timespan timespan
+     * @param fromDate from date
+     * @param toDate to date
+     * @param unadjusted unadjusted, default value: false
+     * @param limit number of queries, default value: 50000
+     * @param sort sort, asc means from oldest to newest
+     * @param polygonClient polygon client
+     * @return The list of 4 price lists and volume list
+     */
+    public static List<List<Double>> getBarPricesAndVolume(String tickerName, Long multiplier,
+                                         Timespan timespan, LocalDate fromDate,
+                                         LocalDate toDate, Boolean unadjusted,
+                                         Long limit, Sort sort,
+                                         PolygonRestClient polygonClient) {
+        log.info("{} Bar Prices & Volume", tickerName);
+        AggregatesParameters idxParams = AggregatesParametersFactory.create(
+                tickerName,
+                multiplier,
+                timespan.getValue(),
+                fromDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                toDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                unadjusted,
+                limit,
+                sort.getValue()
+        );
+
+        AggregatesDTO aggregatesBlocking = polygonClient.getAggregatesBlocking(idxParams);
+        List<AggregateDTO> results = aggregatesBlocking.getResults();
+
+        List<List<Double>> barPricesWithVolume = Arrays.asList(
+                results.stream().map(AggregateDTO::getOpen).collect(Collectors.toList()),
+                results.stream().map(AggregateDTO::getHigh).collect(Collectors.toList()),
+                results.stream().map(AggregateDTO::getLow).collect(Collectors.toList()),
+                results.stream().map(AggregateDTO::getClose).collect(Collectors.toList()),
+                results.stream().map(AggregateDTO::getVolume).collect(Collectors.toList())
+
+        );
+
+        barPricesWithVolume.forEach(CryptoHttpClientUtil::replaceNullWithPrevious);
+
+        return barPricesWithVolume;
+    }
+
+    /**
+     * Get crypto bar prices without volume, which contains open, close, high, and low prices
+     * @param tickerName ticker name
+     * @param multiplier multiplier, default value: 1
+     * @param timespan timespan
+     * @param fromDate from date
+     * @param toDate to date
+     * @param unadjusted unadjusted, default value: false
+     * @param limit number of queries, default value: 50000
+     * @param sort sort, asc means from oldest to newest
+     * @param polygonClient polygon client
+     * @return The list of 4 price lists
+     */
+    public static List<List<Double>> getBarPrices(String tickerName, Long multiplier,
+                                                           Timespan timespan, LocalDate fromDate,
+                                                           LocalDate toDate, Boolean unadjusted,
+                                                           Long limit, Sort sort,
+                                                           PolygonRestClient polygonClient) {
+        log.info("{} Bar", tickerName);
+        AggregatesParameters idxParams = AggregatesParametersFactory.create(
+                tickerName,
+                multiplier,
+                timespan.getValue(),
+                fromDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                toDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                unadjusted,
+                limit,
+                sort.getValue()
+        );
+
+        AggregatesDTO aggregatesBlocking = polygonClient.getAggregatesBlocking(idxParams);
+        List<AggregateDTO> results = aggregatesBlocking.getResults();
+
+        List<List<Double>> barPrices = Arrays.asList(
+                results.stream().map(AggregateDTO::getOpen).collect(Collectors.toList()),
+                results.stream().map(AggregateDTO::getHigh).collect(Collectors.toList()),
+                results.stream().map(AggregateDTO::getLow).collect(Collectors.toList()),
+                results.stream().map(AggregateDTO::getClose).collect(Collectors.toList())
+        );
+
+        barPrices.forEach(CryptoHttpClientUtil::replaceNullWithPrevious);
+
+        return barPrices;
     }
 
     // TODO Add methods to get secondly, minutely, hourly, monthly, quarterly and yearly prices

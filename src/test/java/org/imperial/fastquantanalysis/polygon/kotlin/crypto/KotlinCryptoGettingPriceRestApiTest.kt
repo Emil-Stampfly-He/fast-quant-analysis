@@ -14,10 +14,11 @@ fun main() {
         httpClientProvider = okHttpClientProvider
     )
 
-    val cryptoAggregatesBarsWithClosePrices = cryptoAggregatesBarsWithClosePrices(polygonClient)
-    println(cryptoAggregatesBarsWithClosePrices)
+//    val cryptoAggregatesBarsWithClosePrices = cryptoAggregatesBarsWithClosePrices(polygonClient)
+//    println(cryptoAggregatesBarsWithClosePrices)
 
-    // cryptoExchanges(polygonClient)
+    println(cryptoAggregatesBars(polygonClient))
+
 }
 
 fun cryptoAggregatesBarsWithClosePrices(polygonClient: PolygonRestClient): MutableList<Double?> {

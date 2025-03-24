@@ -29,19 +29,31 @@ public class JavaCryptoGettingPriceRestApiTest {
                 okHttpClientProvider
         );
 
-        List<Double> closePrices = CryptoHttpClientUtil.getClosePrices("X:BTCUSD",
+//        List<Double> closePrices = CryptoHttpClientUtil.getClosePrices(
+//                "X:BTCUSD",
+//                null,
+//                Timespan.DAY,
+//                LocalDate.of(2025, 2, 3),
+//                LocalDate.of(2025,2,7),
+//                null,
+//                null,
+//                Sort.ASC,
+//                polygonClient
+//        );
+
+        List<List<Double>> barPrices = CryptoHttpClientUtil.getBarPrices(
+                "X:BTCUSD",
                 null,
                 Timespan.DAY,
-                LocalDate.of(2024, 2, 3),
-                LocalDate.of(2025,2,7),
+                LocalDate.of(2025, 2, 3),
+                LocalDate.of(2025, 2, 7),
                 null,
                 null,
                 Sort.ASC,
-                polygonClient);
+                polygonClient
+        );
 
-        System.out.println("ClosePrices: " + closePrices);
-
-
+        barPrices.forEach(System.out::println);
     }
 
     public static List<Double> getClosePrices(PolygonRestClient polygonClient) {

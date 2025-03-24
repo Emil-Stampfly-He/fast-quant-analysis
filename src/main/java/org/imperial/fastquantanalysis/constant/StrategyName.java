@@ -9,4 +9,6 @@ package org.imperial.fastquantanalysis.constant;
 public class StrategyName {
 
     public static final String DONCHIAN_CHANNEL = "donchian_channel";
+
+    public static final String PAIR_TRADING = "pair_trading";
 }
