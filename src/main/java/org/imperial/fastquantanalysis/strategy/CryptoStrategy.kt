@@ -178,7 +178,7 @@ class CryptoStrategy (
         }
 
         // Strategy return = position * (spread[t] - spread[t - x]
-        // Previous x day's signal is used for the current day's position
+        // Previous x day's signal is used for current day's position
         val strategyReturns: MutableList<Double> = MutableList(n) { 0.0 }
         for (i in x until n) {
             strategyReturns[i] = spread[i - x] * spread[i] - spread[i - x]

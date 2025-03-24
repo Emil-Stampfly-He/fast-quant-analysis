@@ -57,8 +57,10 @@ public class QuantAnalysisCryptoController {
     public ResponseEntity<?> pairTrading(
             @RequestParam("polygon_api_key") String polygonApiKey,
             @RequestBody CryptoAggregatesPairDTO cryptoAggregatesPairDTO,
-            @RequestParam Integer windowSize) {
-        return quantAnalysisCryptoService.pairTrading(polygonApiKey, cryptoAggregatesPairDTO, windowSize);
+            @RequestParam Integer windowSize,
+            @RequestParam Double zScoreThreshold,
+            @RequestParam Integer x) {
+        return quantAnalysisCryptoService.pairTrading(polygonApiKey, cryptoAggregatesPairDTO, windowSize, zScoreThreshold, x);
     }
 
 }

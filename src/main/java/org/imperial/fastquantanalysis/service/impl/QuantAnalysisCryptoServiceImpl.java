@@ -83,7 +83,8 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
      * @return OK or fail message
      */
     @Override
-    public ResponseEntity<?> pairTrading(String polygonApiKey, CryptoAggregatesPairDTO cryptoAggregatesPairDTO, Integer windowSize) {
+    public ResponseEntity<?> pairTrading(String polygonApiKey, CryptoAggregatesPairDTO cryptoAggregatesPairDTO,
+                                         Integer windowSize, Double zScoreThreshold, Integer x) {
         String tickerName1 = cryptoAggregatesPairDTO.getTickerName1();
         String tickerName2 = cryptoAggregatesPairDTO.getTickerName2();
         Timespan timespan = cryptoAggregatesPairDTO.getTimespan();
@@ -127,9 +128,12 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
                 .boxed()
                 .toList();
 
+        QuantStrategy quantStrategy = cryptoStrategy.pairTrading(avgBarPrice1, avgBarPrice2, windowSize, zScoreThreshold, x);
+        quantStrategy.setStartDate(fromDate.atStartOfDay());
+        quantStrategy.setEndDate(toDate.atStartOfDay());
+        save(quantStrategy);
 
-
-        return null;
+        return ResponseEntity.ok(quantStrategy);
     }
 
 
