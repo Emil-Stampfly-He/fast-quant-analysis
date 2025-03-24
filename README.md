@@ -10,3 +10,4 @@ This project aims to build a platform, where customers can get their specified s
 - Cache solution: Redis
 - Data source: Polygon.io Kotlin RESTFul API
 - Data analysis and modeling: TA4J
+- API document: Swagger
