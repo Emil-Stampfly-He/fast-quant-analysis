@@ -42,7 +42,7 @@ public class JavaCryptoGettingPriceRestApiTest {
 //        );
 
         List<List<Double>> barPrices = CryptoHttpClientUtil.getBarPrices(
-                "X:BTCUSD",
+                "X:ETHUSD", // X:BTCUSD
                 null,
                 Timespan.DAY,
                 LocalDate.of(2025, 2, 3),

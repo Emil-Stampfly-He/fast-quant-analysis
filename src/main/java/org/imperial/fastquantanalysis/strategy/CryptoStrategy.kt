@@ -142,11 +142,11 @@ class CryptoStrategy (
                 strategyName,
                 startDate,
                 endDate,
-                Double.NaN,
-                Double.NaN,
-                Double.NaN,
-                Double.NaN,
-                Double.NaN,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
                 0
             )
         }
@@ -191,7 +191,7 @@ class CryptoStrategy (
         }
 
         // Cumulative return = final equity - 1
-        val cumulativeReturn = equityCurve.last() - 1
+        val cumulativeReturn = if (equityCurve.last().isInfinite()) 0.0 else equityCurve.last() - 1
 
         // Max drawdown
         var peak = equityCurve[0]
@@ -212,7 +212,7 @@ class CryptoStrategy (
         val avgDailyReturn = dailyReturns.average()
         val dailyVol = sqrt(dailyReturns.map { (it - avgDailyReturn).pow(2) }.average())
         val annualizedVolatility = dailyVol * sqrt(365.0)
-        val annualizedReturn = equityCurve.last().pow(365.0 / (n - 1)) - 1
+        val annualizedReturn = if (equityCurve.last().isInfinite()) 0.0 else equityCurve.last().pow(365.0 / (n - 1)) - 1
 
         // Sharpe ratio
         // Risk free rate = 0

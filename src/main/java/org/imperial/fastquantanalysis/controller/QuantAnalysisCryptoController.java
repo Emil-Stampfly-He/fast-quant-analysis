@@ -53,7 +53,7 @@ public class QuantAnalysisCryptoController {
      * @param zScoreThreshold Threshold of z-score
      * @param x Previous x days
      * @return OK or fail message
-     * @postmantest untested
+     * @postmantest passed
      */
     @PostMapping("/pair/trading")
     @ResponseStatus(value = HttpStatus.OK)
