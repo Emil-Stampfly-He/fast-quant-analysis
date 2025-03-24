@@ -25,6 +25,12 @@ import java.time.ZonedDateTime
 import kotlin.math.pow
 import kotlin.math.sqrt
 
+/**
+ * All crypto strategies
+ *
+ * @author Emil S. He
+ * @since 2025-03-20
+ */
 @Component
 class CryptoStrategy (
     @Resource
@@ -241,6 +247,136 @@ class CryptoStrategy (
 
     }
 
+    /**
+     * EMA with percentage stop loss
+     * @param prices price list
+     * @param emaPeriod EMA window size
+     * @param stopLossPercent percentage of stop loss
+     * @return QuantStrategy Object
+     */
+    fun emaWithStopLossPercentage(prices: List<Double>, emaPeriod: Int,
+                                  stopLossPercent: Double): QuantStrategy {
+        val strategyId: String = redisIdUtil.nextId(StrategyName.EMA_WITH_STOP_LOSS_PERCENTAGE)
+        val strategyName: String = StrategyName.EMA_WITH_STOP_LOSS_PERCENTAGE
+        val startDate: LocalDateTime = LocalDateTime.now()
+        val endDate: LocalDateTime = LocalDateTime.now()
+
+        val initialCapital: Double = 1.0
+        val tradingDaysPerYear: Int = 365
+
+        val ema = calculateEMA(prices, emaPeriod)
+        var tradeCount: Int = 0
+        val equityCurve: MutableList<Double> = mutableListOf(initialCapital)
+        var isHolding: Boolean = false
+        var entryPrice: Double = 0.0
+        var stopLossPrice: Double = 0.0
+        var currentCapital: Double = initialCapital
+        var sharesHeld: Double = 0.0
+
+        for (i in emaPeriod until prices.size) {
+            val price = prices[i]
+            val currentEMA = ema[i - emaPeriod]
+            val prevPrice = prices[i - 1]
+            val prevEMA = if (i > emaPeriod) ema[i - emaPeriod - 1] else 0.0
+
+            if (isHolding) {
+                currentCapital = sharesHeld * price
+                equityCurve.add(currentCapital)
+            } else {
+                equityCurve.add(currentCapital)
+            }
+
+            if (!isHolding) {
+                // Buying condition: price crossing above EMA
+                if (prevPrice < prevEMA && price > currentEMA) {
+                    isHolding = true
+                    entryPrice = price
+                    stopLossPrice = entryPrice * (1 - stopLossPercent / 100)
+                    sharesHeld = currentCapital / price
+                    tradeCount++
+                }
+            } else {
+                // Check stop loss
+                if (price <= stopLossPrice) {
+                    isHolding = false
+                    currentCapital = sharesHeld * price
+                    tradeCount++
+                } else if (prevPrice > prevEMA && price < currentEMA) {
+                    // Selling condition: price crossing under EMA
+                    isHolding = false
+                    currentCapital = sharesHeld * price
+                    tradeCount++
+                }
+            }
+        }
+
+        // Size of equity curve cannot be less than 2
+        if (equityCurve.size < 2) {
+            return QuantStrategy(
+                strategyId,
+                strategyName,
+                startDate,
+                endDate,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0
+            )
+        }
+
+        val cumulativeReturn = (equityCurve.last() / initialCapital) - 1.0
+        val totalDays = equityCurve.size - 1
+        val annualizedReturn = if (totalDays > 0) {
+            (1 + cumulativeReturn).pow(tradingDaysPerYear.toDouble() / totalDays) - 1
+        } else 0.0
+
+        var peak = equityCurve[0]
+        var maxDrawdown = 0.0
+        for (value in equityCurve) {
+            if (value > peak) peak = value
+            val drawdown = (peak - value) / peak
+            if (drawdown > maxDrawdown) maxDrawdown = drawdown
+        }
+
+        val returns = equityCurve.zipWithNext().map { (prev, curr) -> (curr - prev) / prev }
+
+        val meanReturn = returns.average()
+        val variance = returns.map { (it - meanReturn).pow(2) }.average()
+        val annualizedVolatility = sqrt(variance * tradingDaysPerYear)
+
+        // Risk free rate = 0
+        val sharpeRatio = if (annualizedVolatility != 0.0) {
+            annualizedReturn / annualizedVolatility
+        } else 0.0
+
+        return QuantStrategy(
+            strategyId,
+            strategyName,
+            startDate,
+            endDate,
+            annualizedReturn,
+            cumulativeReturn,
+            maxDrawdown,
+            annualizedVolatility,
+            sharpeRatio,
+            tradeCount
+        )
+    }
+
+    private fun calculateEMA(prices: List<Double>, period: Int): List<Double> {
+        if (prices.size < period) return emptyList()
+        val ema = mutableListOf<Double>()
+        val sma = prices.take(period).average()
+        ema.add(sma)
+        val k = 2.0 / (period + 1)
+        for (i in period until prices.size) {
+            ema.add(prices[i] * k + ema.last() * (1 - k))
+        }
+        return ema
+    }
+
     private fun mean(prices: MutableList<Double>): Double {
         return prices.average();
     }
@@ -304,8 +440,6 @@ class CryptoStrategy (
 
         return rollStd
     }
-
-
 
 //    fun simpleSMA(barPrices: MutableList<MutableList<Double>>): QuantStrategy {
 //        val strategyId: String = redisIdUtil.nextId(StrategyName.DONCHIAN_CHANNEL)

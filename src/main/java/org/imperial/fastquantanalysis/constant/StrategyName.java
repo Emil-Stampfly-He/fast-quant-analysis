@@ -11,4 +11,6 @@ public class StrategyName {
     public static final String DONCHIAN_CHANNEL = "donchian_channel";
 
     public static final String PAIR_TRADING = "pair_trading";
+
+    public static final String EMA_WITH_STOP_LOSS_PERCENTAGE = "ema_with_stop_loss_percentage";
 }

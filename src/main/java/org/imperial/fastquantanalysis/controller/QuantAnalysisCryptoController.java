@@ -48,7 +48,7 @@ public class QuantAnalysisCryptoController {
     /**
      * Pair trading for 2 cryptos
      * @param polygonApiKey User's polygon API key
-     * @param cryptoAggregatesPairDTO DTO for carrying necessary information
+     * @param cryptoAggregatesPairDTO DTO for carrying necessary information, but in pairs
      * @param windowSize Window size
      * @param zScoreThreshold Threshold of z-score
      * @param x Previous x days
@@ -65,6 +65,26 @@ public class QuantAnalysisCryptoController {
             @Parameter(name = "Threshold of z-score") @RequestParam Double zScoreThreshold,
             @Parameter(name = "Previous x days") @RequestParam Integer x) {
         return quantAnalysisCryptoService.pairTrading(polygonApiKey, cryptoAggregatesPairDTO, windowSize, zScoreThreshold, x);
+    }
+
+    /**
+     * EMA with fixed percentage stop loss
+     * @param polygonApiKey User's polygon API key
+     * @param cryptoAggregatesDTO DTO for carrying necessary information
+     * @param emaPeriod EMA window size
+     * @param stopLossPercentage Fixed percentage of stop loss
+     * @return OK or fail message
+     * @postmantest untested
+     */
+    @PostMapping("ema/stop/loss/percentage")
+    @ResponseStatus(value = HttpStatus.OK)
+    @Operation(summary = "EMA with fixed percentage stop loss strategy for crypto prices")
+    public ResponseEntity<?> EMAWithStopLossPercentage(
+            @Parameter(name = "User's Polygon.io API key") @RequestParam("polygon_api_key") String polygonApiKey,
+            @Parameter(name = "DTO for carrying necessary information") @RequestBody CryptoAggregatesDTO cryptoAggregatesDTO,
+            @Parameter(name = "Window size, as know as EMA period") @RequestParam Integer emaPeriod,
+            @Parameter(name = "Fixed percentage of stop loss") @RequestParam Double stopLossPercentage) {
+        return quantAnalysisCryptoService.EMAWithStopLossPercentage(polygonApiKey, cryptoAggregatesDTO, emaPeriod, stopLossPercentage);
     }
 
 }
