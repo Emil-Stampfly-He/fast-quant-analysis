@@ -1,6 +1,7 @@
 package org.imperial.fastquantanalysis.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping("/user")
-@Tag(name ="User management interface")
+@Tag(name ="User Management Interface")
 public class UserController {
 
     @Resource
@@ -38,7 +39,9 @@ public class UserController {
     @PostMapping("/code")
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Send code to user's email")
-    public ResponseEntity<?> sendCode(@RequestParam("email_id") String emailId, HttpSession session) {
+    public ResponseEntity<?> sendCode(
+            @Parameter(name = "Email ID") @RequestParam("email_id") String emailId,
+            @Parameter(name = "session, not necessary") HttpSession session) {
         return userService.sendCode(emailId, session);
     }
 
@@ -52,7 +55,9 @@ public class UserController {
     @PostMapping("/login")
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Login with email ID and verification code")
-    public ResponseEntity<?> login(@RequestBody UserLoginFormDTO userLoginFormDTO, HttpSession session) {
+    public ResponseEntity<?> login(
+            @Parameter(name = "User's log in detail, including email, verification code and password") @RequestBody UserLoginFormDTO userLoginFormDTO,
+            @Parameter(name = "Session, not necessary") HttpSession session) {
         return userService.login(userLoginFormDTO, session);
     }
 
@@ -68,9 +73,9 @@ public class UserController {
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Update profile details of logged-in user")
     public ResponseEntity<?> userDetailsUpdateHandler(
-            @RequestBody UserDetailUpdateRequestDTO userDetailUpdateRequestDTO,
-            HttpSession session, HttpServletRequest request
-    ) {
+            @Parameter(name = "User's detail, including name and birthday") @RequestBody UserDetailUpdateRequestDTO userDetailUpdateRequestDTO,
+            @Parameter(name = "Session, not necessary") HttpSession session,
+            @Parameter(name = "Servlet request, for test use only") HttpServletRequest request) {
         return userService.updateUserDetails(userDetailUpdateRequestDTO, session, request);
     }
 
@@ -82,9 +87,8 @@ public class UserController {
     @GetMapping("/me")
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Display user's info")
-    public ResponseEntity<?> me(HttpServletRequest request) {
+    public ResponseEntity<?> me(@Parameter(name = "Servlet request, for test use only") HttpServletRequest request) {
         return userService.me(request);
     }
-
 
 }

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping("/quant/analysis/crypto")
-@Tag(name = "Quant analysis interface")
+@Tag(name = "Quant Analysis Interface")
 public class QuantAnalysisCryptoController {
 
     @Resource
@@ -59,11 +59,11 @@ public class QuantAnalysisCryptoController {
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Pair trading strategy for crypto prices")
     public ResponseEntity<?> pairTrading(
-            @RequestParam("polygon_api_key") String polygonApiKey,
-            @RequestBody CryptoAggregatesPairDTO cryptoAggregatesPairDTO,
-            @RequestParam Integer windowSize,
-            @RequestParam Double zScoreThreshold,
-            @RequestParam Integer x) {
+            @Parameter(name = "User's Polygon.io API key") @RequestParam("polygon_api_key") String polygonApiKey,
+            @Parameter(name = "DTO for carrying necessary information") @RequestBody CryptoAggregatesPairDTO cryptoAggregatesPairDTO,
+            @Parameter(name = "Window size") @RequestParam Integer windowSize,
+            @Parameter(name = "Threshold of z-score") @RequestParam Double zScoreThreshold,
+            @Parameter(name = "Previous x days") @RequestParam Integer x) {
         return quantAnalysisCryptoService.pairTrading(polygonApiKey, cryptoAggregatesPairDTO, windowSize, zScoreThreshold, x);
     }
 
