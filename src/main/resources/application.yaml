@@ -35,10 +35,13 @@ logging:
   file:
     name: D:\\Study\\FinTech Courses\\ Project\\AppliedProject\\log\\fast-quant-analysis\\fastQuantAnalysis.log
 springdoc:
-  api-docs:
-    enabled: true
-    path: /v3/api-docs
   swagger-ui:
-    enabled: true
     path: /swagger-ui.html
-    operations-sorter: method
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: org.imperial.fastquantanalysis.controller

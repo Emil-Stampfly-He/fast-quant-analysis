@@ -9,6 +9,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Handler of global exception
+ *
+ * @author Emil S. He
+ * @since 2025-03-23
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 

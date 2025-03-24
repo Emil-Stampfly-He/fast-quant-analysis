@@ -1,6 +1,8 @@
 package org.imperial.fastquantanalysis.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.imperial.fastquantanalysis.dto.CryptoAggregatesDTO;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping("/quant/analysis/crypto")
+@Tag(name = "Quant analysis interface")
 public class QuantAnalysisCryptoController {
 
     @Resource
@@ -36,9 +39,9 @@ public class QuantAnalysisCryptoController {
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Donchian channel strategy for crypto prices")
     public ResponseEntity<?> donchian(
-            @RequestParam("polygon_api_key") String polygonApiKey,
-            @RequestBody CryptoAggregatesDTO cryptoAggregatesDTO,
-            @RequestParam Integer windowSize) {
+            @Parameter(name = "User's Polygon.io API key") @RequestParam("polygon_api_key") String polygonApiKey,
+            @Parameter(name = "DTO for carrying necessary information") @RequestBody CryptoAggregatesDTO cryptoAggregatesDTO,
+            @Parameter(name = "Window size") @RequestParam Integer windowSize) {
         return quantAnalysisCryptoService.donchian(polygonApiKey, cryptoAggregatesDTO, windowSize);
     }
 
@@ -47,13 +50,14 @@ public class QuantAnalysisCryptoController {
      * @param polygonApiKey User's polygon API key
      * @param cryptoAggregatesPairDTO DTO for carrying necessary information
      * @param windowSize Window size
+     * @param zScoreThreshold Threshold of z-score
+     * @param x Previous x days
      * @return OK or fail message
      * @postmantest untested
-     * TODO Unfinished
      */
     @PostMapping("/pair/trading")
     @ResponseStatus(value = HttpStatus.OK)
-    @Operation(summary = "Pair trading stategy for crypto prices")
+    @Operation(summary = "Pair trading strategy for crypto prices")
     public ResponseEntity<?> pairTrading(
             @RequestParam("polygon_api_key") String polygonApiKey,
             @RequestBody CryptoAggregatesPairDTO cryptoAggregatesPairDTO,
