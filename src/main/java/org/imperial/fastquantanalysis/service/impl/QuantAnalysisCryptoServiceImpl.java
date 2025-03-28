@@ -6,6 +6,7 @@ import io.polygon.kotlin.sdk.rest.PolygonRestClient;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.imperial.fastquantanalysis.annotation.AsyncTimed;
+import org.imperial.fastquantanalysis.constant.KafkaConstant;
 import org.imperial.fastquantanalysis.constant.Sort;
 import org.imperial.fastquantanalysis.constant.Timespan;
 import org.imperial.fastquantanalysis.dto.CryptoAggregatesDTO;
@@ -16,6 +17,7 @@ import org.imperial.fastquantanalysis.service.IQuantAnalysisCryptoService;
 import org.imperial.fastquantanalysis.strategy.CryptoStrategy;
 import org.imperial.fastquantanalysis.util.CryptoHttpClientUtil;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -38,7 +40,17 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
     @Resource
     private CryptoStrategy cryptoStrategy;
 
+    @Resource
+    private KafkaTemplate<String, QuantStrategy> kafkaTemplate;
+
     private static final ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            log.info("Shutting down executor service...");
+            executorService.shutdown();
+        }));
+    }
 
     /**
      * Donchian channel strategy for crypto
@@ -74,24 +86,26 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
         QuantStrategy quantStrategy = cryptoStrategy.donchianChannel(closePrices, windowSize);
         quantStrategy.setStartDate(fromDate.atStartOfDay());
         quantStrategy.setEndDate(toDate.atStartOfDay());
-        this.save(quantStrategy);
+
+        kafkaTemplate.send(KafkaConstant.TOPIC_NAME, quantStrategy);
 
         return ResponseEntity.ok(quantStrategy);
     }
 
     /**
      * Pair trading for 2 cryptos
-     *
-     * @param polygonApiKey           User's polygon API key
-     * @param cryptoAggregatesPairDTO DTO for carrying necessary information
-     * @param windowSize              Window size
+     * @param polygonApiKey User's polygon API key
+     * @param cryptoAggregatesPairDTO DTO for carrying necessary information, but in pairs
+     * @param windowSize Window size
+     * @param zScoreThreshold Threshold of z-score
+     * @param x Previous x days
      * @return OK or fail message
      */
     @AsyncTimed
     @Override
     public CompletableFuture<ResponseEntity<?>> pairTrading(String polygonApiKey, CryptoAggregatesPairDTO cryptoAggregatesPairDTO,
                                                             Integer windowSize, Double zScoreThreshold, Integer x) {
-        PolygonRestClient client = new PolygonRestClient(polygonApiKey, CryptoHttpClientUtil.getOkHttpClientProvider());
+        PolygonRestClient polygonRestClient = new PolygonRestClient(polygonApiKey, CryptoHttpClientUtil.getOkHttpClientProvider());
 
         CompletableFuture<List<List<Double>>> future1 = CompletableFuture.supplyAsync(() ->
                 CryptoHttpClientUtil.getBarPrices(
@@ -103,7 +117,7 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
                         cryptoAggregatesPairDTO.getUnadjusted(),
                         cryptoAggregatesPairDTO.getLimit(),
                         cryptoAggregatesPairDTO.getSort(),
-                        client),
+                        polygonRestClient),
                 executorService
         );
 
@@ -117,11 +131,11 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
                         cryptoAggregatesPairDTO.getUnadjusted(),
                         cryptoAggregatesPairDTO.getLimit(),
                         cryptoAggregatesPairDTO.getSort(),
-                        client),
+                        polygonRestClient),
                 executorService
         );
 
-        return future1.thenCombine(future2, (barPrices1, barPrices2) -> {
+        return future1.thenCombineAsync(future2, (barPrices1, barPrices2) -> {
             List<Double> avgBarPrice1 = IntStream.range(0, barPrices1.get(0).size())
                     .mapToDouble(i -> barPrices1.stream().mapToDouble(list -> list.get(i)).average().orElse(0))
                     .boxed().toList();
@@ -130,13 +144,14 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
                     .mapToDouble(i -> barPrices2.stream().mapToDouble(list -> list.get(i)).average().orElse(0))
                     .boxed().toList();
 
-            QuantStrategy strategy = cryptoStrategy.pairTrading(avgBarPrice1, avgBarPrice2, windowSize, zScoreThreshold, x);
-            strategy.setStartDate(cryptoAggregatesPairDTO.getFromDate().atStartOfDay());
-            strategy.setEndDate(cryptoAggregatesPairDTO.getToDate().atStartOfDay());
+            QuantStrategy quantStrategy = cryptoStrategy.pairTrading(avgBarPrice1, avgBarPrice2, windowSize, zScoreThreshold, x);
+            quantStrategy.setStartDate(cryptoAggregatesPairDTO.getFromDate().atStartOfDay());
+            quantStrategy.setEndDate(cryptoAggregatesPairDTO.getToDate().atStartOfDay());
 
-            this.save(strategy);
-            return ResponseEntity.ok(strategy);
-        });
+            kafkaTemplate.send(KafkaConstant.TOPIC_NAME, quantStrategy);
+
+            return ResponseEntity.ok(quantStrategy);
+        }, executorService);
     }
 
     /**
@@ -148,7 +163,8 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
      * @return OK or fail message
      */
     @Override
-    public ResponseEntity<?> EMAWithStopLossPercentage(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO, Integer emaPeriod, Double stopLossPercentage) {
+    public ResponseEntity<?> EMAWithStopLossPercentage(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO,
+                                                       Integer emaPeriod, Double stopLossPercentage) {
         String tickerName = cryptoAggregatesDTO.getTickerName();
         Timespan timespan = cryptoAggregatesDTO.getTimespan();
         LocalDate fromDate = cryptoAggregatesDTO.getFromDate();
@@ -180,11 +196,9 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
         QuantStrategy quantStrategy = cryptoStrategy.emaWithStopLossPercentage(avgBarPrice, emaPeriod, stopLossPercentage);
         quantStrategy.setStartDate(fromDate.atStartOfDay());
         quantStrategy.setEndDate(toDate.atStartOfDay());
-        this.save(quantStrategy);
+
+        kafkaTemplate.send(KafkaConstant.TOPIC_NAME, quantStrategy);
 
         return ResponseEntity.ok(quantStrategy);
     }
-
-
-
 }

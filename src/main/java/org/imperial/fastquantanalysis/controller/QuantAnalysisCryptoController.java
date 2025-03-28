@@ -48,7 +48,7 @@ public class QuantAnalysisCryptoController {
     }
 
     /**
-     * Pair trading for 2 cryptos
+     * Pair trading for 2 cryptos asynchronously
      * @param polygonApiKey User's polygon API key
      * @param cryptoAggregatesPairDTO DTO for carrying necessary information, but in pairs
      * @param windowSize Window size
@@ -88,6 +88,4 @@ public class QuantAnalysisCryptoController {
             @Parameter(name = "Fixed percentage of stop loss") @RequestParam Double stopLossPercentage) {
         return quantAnalysisCryptoService.EMAWithStopLossPercentage(polygonApiKey, cryptoAggregatesDTO, emaPeriod, stopLossPercentage);
     }
-
-
 }

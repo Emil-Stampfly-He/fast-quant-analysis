@@ -248,7 +248,7 @@ class CryptoStrategy (
     }
 
     /**
-     * EMA with percentage stop loss
+     * EMA with fixed percentage stop loss
      * @param prices price list
      * @param emaPeriod EMA window size
      * @param stopLossPercent percentage of stop loss
@@ -441,70 +441,4 @@ class CryptoStrategy (
 
         return rollStd
     }
-
-//    fun simpleSMA(barPrices: MutableList<MutableList<Double>>): QuantStrategy {
-//        val strategyId: String = redisIdUtil.nextId(StrategyName.DONCHIAN_CHANNEL)
-//        val strategyName: String = StrategyName.DONCHIAN_CHANNEL
-//        val startDate: LocalDateTime = LocalDateTime.now()
-//        val endDate: LocalDateTime = LocalDateTime.now()
-//
-//        val bars: MutableList<Bar> = mutableListOf<Bar>()
-//        var endTime: ZonedDateTime = endDate.atZone(ZoneId.systemDefault())
-//        for (i in 0 until barPrices[0].size) {
-//            val bar: Bar = BaseBar(
-//                Duration.ofDays(1),
-//                endDate.atZone(ZoneId.systemDefault()),
-//                barPrices[0][i], // open
-//                barPrices[1][i], // high
-//                barPrices[2][i], // low
-//                barPrices[3][i], // close
-//                barPrices[4][i], // volume
-//            )
-//
-//            bars.add(bar)
-//            endTime = endTime.minusDays(1);
-//
-//            bars.reverse()
-//
-//            // 创建时间序列
-//            val series: TimeSeries = ("price_series", bars)
-//
-//            // 创建收盘价指标
-//            val closePriceIndicator = ClosePriceIndicator(series)
-//
-//            // 计算简单移动平均（SMA），窗口期设为3
-//            val smaPeriod = 3
-//            val smaIndicator = SMAIndicator(closePriceIndicator, smaPeriod)
-//
-//            // 定义交易规则：
-//            // 买入规则：当收盘价上穿 SMA 时触发
-//            val entryRule = OverIndicatorRule(closePriceIndicator, smaIndicator)
-//            // 卖出规则：当收盘价下穿 SMA 时触发
-//            val exitRule = UnderIndicatorRule(closePriceIndicator, smaIndicator)
-//
-//            // 创建策略
-//            val strategy: Strategy = BaseStrategy(entryRule, exitRule)
-//
-//            // 使用 TimeSeriesManager 回测策略
-//            val seriesManager = TimeSeriesManager(series)
-//            val tradingRecord = seriesManager.run(strategy)
-//
-//            // 使用 TA4J 的评估标准计算指标
-//            val totalProfitCriterion = TotalProfitCriterion()
-//            val annualizedReturnCriterion = AnnualizedReturnCriterion()
-//            val maximumDrawdownCriterion = MaximumDrawdownCriterion()
-//            val standardDeviationCriterion = StandardDeviationCriterion()  // 用于衡量波动率
-//            val sharpeRatioCriterion = SharpeRatioCriterion()
-//            val numberOfTradesCriterion = NumberOfTradesCriterion()
-//
-//            // 注意：TA4J计算的结果是Num类型，转换为Double后更易处理
-//            val cumulativeReturn = totalProfitCriterion.calculate(series, tradingRecord).toDouble()
-//            val annualizedReturn = annualizedReturnCriterion.calculate(series, tradingRecord).toDouble()
-//            val maxDrawdown = maximumDrawdownCriterion.calculate(series, tradingRecord).toDouble()
-//            val volatility = standardDeviationCriterion.calculate(series, tradingRecord).toDouble()
-//            val sharpeRatio = sharpeRatioCriterion.calculate(series, tradingRecord).toDouble()
-//            val tradeCount = numberOfTradesCriterion.calculate(series, tradingRecord).toDouble().toInt()
-//
-//        }
-//    }
 }
