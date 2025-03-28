@@ -5,6 +5,7 @@ import io.polygon.kotlin.sdk.HttpClientProvider;
 import io.polygon.kotlin.sdk.rest.PolygonRestClient;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.imperial.fastquantanalysis.annotation.AsyncTimed;
 import org.imperial.fastquantanalysis.constant.Sort;
 import org.imperial.fastquantanalysis.constant.Timespan;
 import org.imperial.fastquantanalysis.dto.CryptoAggregatesDTO;
@@ -19,6 +20,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 /**
@@ -33,6 +37,8 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
 
     @Resource
     private CryptoStrategy cryptoStrategy;
+
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
     /**
      * Donchian channel strategy for crypto
@@ -75,65 +81,72 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
 
     /**
      * Pair trading for 2 cryptos
-     * @param polygonApiKey User's polygon API key
+     *
+     * @param polygonApiKey           User's polygon API key
      * @param cryptoAggregatesPairDTO DTO for carrying necessary information
-     * @param windowSize Window size
+     * @param windowSize              Window size
      * @return OK or fail message
      */
+    @AsyncTimed
     @Override
-    public ResponseEntity<?> pairTrading(String polygonApiKey, CryptoAggregatesPairDTO cryptoAggregatesPairDTO,
-                                         Integer windowSize, Double zScoreThreshold, Integer x) {
-        String tickerName1 = cryptoAggregatesPairDTO.getTickerName1();
-        String tickerName2 = cryptoAggregatesPairDTO.getTickerName2();
-        Timespan timespan = cryptoAggregatesPairDTO.getTimespan();
-        LocalDate fromDate = cryptoAggregatesPairDTO.getFromDate();
-        LocalDate toDate = cryptoAggregatesPairDTO.getToDate();
-        Sort sort = cryptoAggregatesPairDTO.getSort();
+    public CompletableFuture<ResponseEntity<?>> pairTrading(String polygonApiKey, CryptoAggregatesPairDTO cryptoAggregatesPairDTO,
+                                                            Integer windowSize, Double zScoreThreshold, Integer x) {
+        PolygonRestClient client = new PolygonRestClient(polygonApiKey, CryptoHttpClientUtil.getOkHttpClientProvider());
 
-        Long multiplier = cryptoAggregatesPairDTO.getMultiplier();
-        Boolean unadjusted = cryptoAggregatesPairDTO.getUnadjusted();
-        Long limit = cryptoAggregatesPairDTO.getLimit();
-
-        HttpClientProvider okHttpClientProvider = CryptoHttpClientUtil.getOkHttpClientProvider();
-        PolygonRestClient polygonRestClient = new PolygonRestClient(
-                polygonApiKey,
-                okHttpClientProvider
+        CompletableFuture<List<List<Double>>> future1 = CompletableFuture.supplyAsync(() ->
+                CryptoHttpClientUtil.getBarPrices(
+                        cryptoAggregatesPairDTO.getTickerName1(),
+                        cryptoAggregatesPairDTO.getMultiplier(),
+                        cryptoAggregatesPairDTO.getTimespan(),
+                        cryptoAggregatesPairDTO.getFromDate(),
+                        cryptoAggregatesPairDTO.getToDate(),
+                        cryptoAggregatesPairDTO.getUnadjusted(),
+                        cryptoAggregatesPairDTO.getLimit(),
+                        cryptoAggregatesPairDTO.getSort(),
+                        client),
+                executorService
         );
 
-        List<List<Double>> barPrices1 = CryptoHttpClientUtil.getBarPrices(
-                tickerName1, multiplier,
-                timespan, fromDate,
-                toDate, unadjusted,
-                limit, sort, polygonRestClient
+        CompletableFuture<List<List<Double>>> future2 = CompletableFuture.supplyAsync(() ->
+                CryptoHttpClientUtil.getBarPrices(
+                        cryptoAggregatesPairDTO.getTickerName2(),
+                        cryptoAggregatesPairDTO.getMultiplier(),
+                        cryptoAggregatesPairDTO.getTimespan(),
+                        cryptoAggregatesPairDTO.getFromDate(),
+                        cryptoAggregatesPairDTO.getToDate(),
+                        cryptoAggregatesPairDTO.getUnadjusted(),
+                        cryptoAggregatesPairDTO.getLimit(),
+                        cryptoAggregatesPairDTO.getSort(),
+                        client),
+                executorService
         );
-        List<List<Double>> barPrices2 = CryptoHttpClientUtil.getBarPrices(
-                tickerName2, multiplier,
-                timespan, fromDate,
-                toDate, unadjusted,
-                limit, sort, polygonRestClient
-        );
 
-        List<Double> avgBarPrice1 = IntStream.range(0, barPrices1.get(0).size())
-                .mapToDouble(i -> barPrices1.stream()
-                        .mapToDouble(list ->
-                                list.get(i)).average().orElse(0))
-                .boxed()
-                .toList();
-        List<Double> avgBarPrice2 = IntStream.range(0, barPrices1.get(0).size())
-                .mapToDouble(i -> barPrices2.stream()
-                        .mapToDouble(list ->
-                                list.get(i)).average().orElse(0))
-                .boxed()
-                .toList();
+        return future1.thenCombine(future2, (barPrices1, barPrices2) -> {
+            List<Double> avgBarPrice1 = IntStream.range(0, barPrices1.get(0).size())
+                    .mapToDouble(i -> barPrices1.stream().mapToDouble(list -> list.get(i)).average().orElse(0))
+                    .boxed().toList();
 
-        QuantStrategy quantStrategy = cryptoStrategy.pairTrading(avgBarPrice1, avgBarPrice2, windowSize, zScoreThreshold, x);
-        quantStrategy.setStartDate(fromDate.atStartOfDay());
-        quantStrategy.setEndDate(toDate.atStartOfDay());
-        this.save(quantStrategy);
+            List<Double> avgBarPrice2 = IntStream.range(0, barPrices2.get(0).size())
+                    .mapToDouble(i -> barPrices2.stream().mapToDouble(list -> list.get(i)).average().orElse(0))
+                    .boxed().toList();
 
-        return ResponseEntity.ok(quantStrategy);
+            QuantStrategy strategy = cryptoStrategy.pairTrading(avgBarPrice1, avgBarPrice2, windowSize, zScoreThreshold, x);
+            strategy.setStartDate(cryptoAggregatesPairDTO.getFromDate().atStartOfDay());
+            strategy.setEndDate(cryptoAggregatesPairDTO.getToDate().atStartOfDay());
+
+            this.save(strategy);
+            return ResponseEntity.ok(strategy);
+        });
     }
 
+    /**
+     * EMA with fixed percentage stop loss
+     * @param polygonApiKey User's polygon API key
+     * @param cryptoAggregatesDTO DTO for carrying necessary information
+     * @param emaPeriod EMA window size
+     * @param stopLossPercentage Fixed percentage of stop loss
+     * @return OK or fail message
+     */
     @Override
     public ResponseEntity<?> EMAWithStopLossPercentage(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO, Integer emaPeriod, Double stopLossPercentage) {
         String tickerName = cryptoAggregatesDTO.getTickerName();
@@ -171,5 +184,7 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
 
         return ResponseEntity.ok(quantStrategy);
     }
+
+
 
 }

@@ -7,6 +7,7 @@ import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Calendar;
 
 @Slf4j

@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Quant analysis crypto controller
  *
@@ -58,7 +60,7 @@ public class QuantAnalysisCryptoController {
     @PostMapping("/pair/trading")
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Pair trading strategy for crypto prices")
-    public ResponseEntity<?> pairTrading(
+    public CompletableFuture<ResponseEntity<?>> pairTrading(
             @Parameter(name = "User's Polygon.io API key") @RequestParam("polygon_api_key") String polygonApiKey,
             @Parameter(name = "DTO for carrying necessary information") @RequestBody CryptoAggregatesPairDTO cryptoAggregatesPairDTO,
             @Parameter(name = "Window size") @RequestParam Integer windowSize,
@@ -86,5 +88,6 @@ public class QuantAnalysisCryptoController {
             @Parameter(name = "Fixed percentage of stop loss") @RequestParam Double stopLossPercentage) {
         return quantAnalysisCryptoService.EMAWithStopLossPercentage(polygonApiKey, cryptoAggregatesDTO, emaPeriod, stopLossPercentage);
     }
+
 
 }

@@ -423,7 +423,8 @@ class CryptoStrategy (
         return rollMean
     }
 
-    private fun rollingStd(barPrices: MutableList<Double>, rollMean:MutableList<Double>, window: Int): MutableList<Double> {
+    private fun rollingStd(barPrices: MutableList<Double>,
+                           rollMean:MutableList<Double>, window: Int): MutableList<Double> {
         val n = barPrices.size
         val rollStd = MutableList(n) { Double.NaN }
 
