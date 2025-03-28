@@ -8,6 +8,7 @@ This project aims to build a platform, where customers can get their specified s
 - Web framework: SpringBoot
 - Database framework: MyBatisPlus
 - Cache solution: Redis
+- Asynchronous message queue: Kafka
 - Data source: Polygon.io Kotlin RESTFul API
 - Data analysis and modeling: TA4J
 - API document: Swagger
