@@ -1,4 +1,4 @@
-package org.imperial.fastquantanalysis.model.config;
+package org.imperial.fastquantanalysis.model;
 
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;

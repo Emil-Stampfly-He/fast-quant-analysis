@@ -163,10 +163,10 @@ public class CryptoHttpClientUtil {
      * @return The list of 4 price lists
      */
     public static List<List<Double>> getBarPrices(String tickerName, Long multiplier,
-                                                           Timespan timespan, LocalDate fromDate,
-                                                           LocalDate toDate, Boolean unadjusted,
-                                                           Long limit, Sort sort,
-                                                           PolygonRestClient polygonClient) {
+                                                  Timespan timespan, LocalDate fromDate,
+                                                  LocalDate toDate, Boolean unadjusted,
+                                                  Long limit, Sort sort,
+                                                  PolygonRestClient polygonClient) {
         log.info("{} Bar", tickerName);
         AggregatesParameters idxParams = AggregatesParametersFactory.create(
                 tickerName,
@@ -183,10 +183,10 @@ public class CryptoHttpClientUtil {
         List<AggregateDTO> results = aggregatesBlocking.getResults();
 
         List<List<Double>> barPrices = Arrays.asList(
-                results.stream().map(AggregateDTO::getOpen).collect(Collectors.toList()),
-                results.stream().map(AggregateDTO::getHigh).collect(Collectors.toList()),
-                results.stream().map(AggregateDTO::getLow).collect(Collectors.toList()),
-                results.stream().map(AggregateDTO::getClose).collect(Collectors.toList())
+                results.stream().map(AggregateDTO::getOpen).collect(Collectors.toList()), // 0: open prices
+                results.stream().map(AggregateDTO::getHigh).collect(Collectors.toList()), // 1: high prices
+                results.stream().map(AggregateDTO::getLow).collect(Collectors.toList()), // 2. low prices
+                results.stream().map(AggregateDTO::getClose).collect(Collectors.toList()) // 3. close prices
         );
 
         barPrices.forEach(CryptoHttpClientUtil::replaceNullWithPrevious);
