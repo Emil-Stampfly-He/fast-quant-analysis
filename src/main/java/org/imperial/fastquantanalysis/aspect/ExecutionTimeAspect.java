@@ -8,6 +8,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Aspect methods
+ *
+ * @author Emil S. He
+ * @since 2025-03-28
+ */
 @Slf4j
 @Aspect
 @Component

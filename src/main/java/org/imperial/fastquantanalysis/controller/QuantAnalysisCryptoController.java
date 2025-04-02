@@ -7,6 +7,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.imperial.fastquantanalysis.dto.CryptoAggregatesDTO;
 import org.imperial.fastquantanalysis.dto.CryptoAggregatesPairDTO;
+import org.imperial.fastquantanalysis.entity.QuantStrategy;
 import org.imperial.fastquantanalysis.service.IQuantAnalysisCryptoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,7 @@ public class QuantAnalysisCryptoController {
     @PostMapping("/donchian")
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Donchian channel strategy for crypto prices")
-    public ResponseEntity<?> donchian(
+    public ResponseEntity<QuantStrategy> donchian(
             @Parameter(name = "User's Polygon.io API key") @RequestParam("polygon_api_key") String polygonApiKey,
             @Parameter(name = "DTO for carrying necessary information") @RequestBody CryptoAggregatesDTO cryptoAggregatesDTO,
             @Parameter(name = "Window size") @RequestParam Integer windowSize) {
@@ -60,7 +61,7 @@ public class QuantAnalysisCryptoController {
     @PostMapping("/pair/trading")
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Pair trading strategy for crypto prices")
-    public CompletableFuture<ResponseEntity<?>> pairTrading(
+    public CompletableFuture<ResponseEntity<QuantStrategy>> pairTrading(
             @Parameter(name = "User's Polygon.io API key") @RequestParam("polygon_api_key") String polygonApiKey,
             @Parameter(name = "DTO for carrying necessary information") @RequestBody CryptoAggregatesPairDTO cryptoAggregatesPairDTO,
             @Parameter(name = "Window size") @RequestParam Integer windowSize,
@@ -78,14 +79,37 @@ public class QuantAnalysisCryptoController {
      * @return OK or fail message
      * @postmantest untested
      */
-    @PostMapping("ema/stop/loss/percentage")
+    @PostMapping("/ema/stop/loss/percentage")
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "EMA with fixed percentage stop loss strategy for crypto prices")
-    public ResponseEntity<?> EMAWithStopLossPercentage(
+    public ResponseEntity<QuantStrategy> emaWithStopLossPercentage(
             @Parameter(name = "User's Polygon.io API key") @RequestParam("polygon_api_key") String polygonApiKey,
             @Parameter(name = "DTO for carrying necessary information") @RequestBody CryptoAggregatesDTO cryptoAggregatesDTO,
             @Parameter(name = "Window size, as know as EMA period") @RequestParam Integer emaPeriod,
             @Parameter(name = "Fixed percentage of stop loss") @RequestParam Double stopLossPercentage) {
-        return quantAnalysisCryptoService.EMAWithStopLossPercentage(polygonApiKey, cryptoAggregatesDTO, emaPeriod, stopLossPercentage);
+        return quantAnalysisCryptoService.emaWithStopLossPercentage(polygonApiKey, cryptoAggregatesDTO, emaPeriod, stopLossPercentage);
+    }
+
+    /**
+     * EMA with dynamic stol loss strategy using ATR for crypto prices
+     * @param polygonApiKey User's polygon API key
+     * @param cryptoAggregatesDTO DTO for carrying necessary information
+     * @param emaPeriod EMA window size
+     * @param atrPeriod ATR window size
+     * @param atrMultiplier ATR multiplier
+     * @return OK or fail message
+     * @postmantest untested
+     * TODO Unfinished
+     */
+    @PostMapping("/ema/stop/loss/atr")
+    @ResponseStatus(value = HttpStatus.OK)
+    @Operation(summary = "EMA with dynamic stol loss strategy using ATR for crypto prices")
+    public ResponseEntity<QuantStrategy> emaWithATRStopLoss(
+            @Parameter(name = "User's Polygon.io API key") @RequestParam("polygon_api_key") String polygonApiKey,
+            @Parameter(name = "DTO for carrying necessary information") @RequestBody CryptoAggregatesDTO cryptoAggregatesDTO,
+            @Parameter(name = "EMA period") @RequestParam Integer emaPeriod,
+            @Parameter(name = "ATR period") @RequestParam Integer atrPeriod,
+            @Parameter(name = "ATR multiplier") @RequestParam Double atrMultiplier) {
+        return quantAnalysisCryptoService.emaWithATRStopLoss(polygonApiKey, cryptoAggregatesDTO, emaPeriod, atrPeriod, atrMultiplier);
     }
 }

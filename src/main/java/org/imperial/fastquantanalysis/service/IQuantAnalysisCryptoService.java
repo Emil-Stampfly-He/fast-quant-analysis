@@ -16,9 +16,11 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface IQuantAnalysisCryptoService extends IService<QuantStrategy> {
 
-    ResponseEntity<?> donchian(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO, Integer windowSize);
+    ResponseEntity<QuantStrategy> donchian(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO, Integer windowSize);
 
-    CompletableFuture<ResponseEntity<?>> pairTrading(String polygonApiKey, CryptoAggregatesPairDTO cryptoAggregatesPairDTO, Integer windowSize, Double zScoreThreshold, Integer x);
+    CompletableFuture<ResponseEntity<QuantStrategy>> pairTrading(String polygonApiKey, CryptoAggregatesPairDTO cryptoAggregatesPairDTO, Integer windowSize, Double zScoreThreshold, Integer x);
 
-    ResponseEntity<?> EMAWithStopLossPercentage(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO, Integer emaPeriod, Double stopLossPercentage);
+    ResponseEntity<QuantStrategy> emaWithStopLossPercentage(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO, Integer emaPeriod, Double stopLossPercentage);
+
+    ResponseEntity<QuantStrategy> emaWithATRStopLoss(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO, Integer emaPeriod, Integer atrPeriod, Double atrMultiplier);
 }

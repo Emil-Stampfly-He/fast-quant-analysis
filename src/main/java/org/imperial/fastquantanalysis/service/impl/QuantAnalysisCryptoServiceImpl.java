@@ -60,7 +60,7 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
      * @return OK or fail message
      */
     @Override
-    public ResponseEntity<?> donchian(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO, Integer windowSize) {
+    public ResponseEntity<QuantStrategy> donchian(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO, Integer windowSize) {
         String tickerName = cryptoAggregatesDTO.getTickerName();
         Timespan timespan = cryptoAggregatesDTO.getTimespan();
         LocalDate fromDate = cryptoAggregatesDTO.getFromDate();
@@ -103,7 +103,7 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
      */
     @AsyncTimed
     @Override
-    public CompletableFuture<ResponseEntity<?>> pairTrading(String polygonApiKey, CryptoAggregatesPairDTO cryptoAggregatesPairDTO,
+    public CompletableFuture<ResponseEntity<QuantStrategy>> pairTrading(String polygonApiKey, CryptoAggregatesPairDTO cryptoAggregatesPairDTO,
                                                             Integer windowSize, Double zScoreThreshold, Integer x) {
         PolygonRestClient polygonRestClient = new PolygonRestClient(polygonApiKey, CryptoHttpClientUtil.getOkHttpClientProvider());
 
@@ -163,7 +163,7 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
      * @return OK or fail message
      */
     @Override
-    public ResponseEntity<?> EMAWithStopLossPercentage(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO,
+    public ResponseEntity<QuantStrategy> emaWithStopLossPercentage(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO,
                                                        Integer emaPeriod, Double stopLossPercentage) {
         String tickerName = cryptoAggregatesDTO.getTickerName();
         Timespan timespan = cryptoAggregatesDTO.getTimespan();
@@ -186,6 +186,7 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
                 unadjusted, limit, sort,
                 polygonRestClient
         );
+        List<Double> closePrices = barPrices.get(3);
         List<Double> avgBarPrice = IntStream.range(0, barPrices.get(0).size())
                 .mapToDouble(i -> barPrices.stream()
                         .mapToDouble(list ->
@@ -193,7 +194,42 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
                 .boxed()
                 .toList();
 
-        QuantStrategy quantStrategy = cryptoStrategy.emaWithStopLossPercentage(avgBarPrice, emaPeriod, stopLossPercentage);
+        QuantStrategy quantStrategy = cryptoStrategy.emaWithStopLossPercentage(closePrices, avgBarPrice, emaPeriod, stopLossPercentage);
+        quantStrategy.setStartDate(fromDate.atStartOfDay());
+        quantStrategy.setEndDate(toDate.atStartOfDay());
+
+        kafkaTemplate.send(KafkaConstant.TOPIC_NAME, quantStrategy);
+
+        return ResponseEntity.ok(quantStrategy);
+    }
+
+    @Override
+    public ResponseEntity<QuantStrategy> emaWithATRStopLoss(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO,
+                                                Integer emaPeriod, Integer atrPeriod,
+                                                Double atrMultiplier) {
+        String tickerName = cryptoAggregatesDTO.getTickerName();
+        Timespan timespan = cryptoAggregatesDTO.getTimespan();
+        LocalDate fromDate = cryptoAggregatesDTO.getFromDate();
+        LocalDate toDate = cryptoAggregatesDTO.getToDate();
+        Sort sort = cryptoAggregatesDTO.getSort();
+        Long multiplier = cryptoAggregatesDTO.getMultiplier();
+        Boolean unadjusted = cryptoAggregatesDTO.getUnadjusted();
+        Long limit = cryptoAggregatesDTO.getLimit();
+
+        HttpClientProvider okHttpClientProvider = CryptoHttpClientUtil.getOkHttpClientProvider();
+        PolygonRestClient polygonRestClient = new PolygonRestClient(
+                polygonApiKey,
+                okHttpClientProvider
+        );
+
+        List<List<Double>> barPrices = CryptoHttpClientUtil.getBarPrices(
+                tickerName, multiplier,
+                timespan, fromDate, toDate,
+                unadjusted, limit, sort,
+                polygonRestClient
+        );
+
+        QuantStrategy quantStrategy = cryptoStrategy.emaWithATRStopLoss(barPrices, emaPeriod, atrPeriod, atrMultiplier);
         quantStrategy.setStartDate(fromDate.atStartOfDay());
         quantStrategy.setEndDate(toDate.atStartOfDay());
 
