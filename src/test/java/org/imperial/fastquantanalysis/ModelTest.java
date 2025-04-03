@@ -50,6 +50,7 @@ public class ModelTest {
         System.out.println(barPrices);
 
         List<Double> testPredictData = modelTraining.train(
+                22,
                 barPrices,
                 () -> modelConfig.getLSTMRNNDefaultModel(2, 1),
                 5);

@@ -1,6 +1,5 @@
 package org.imperial.fastquantanalysis.model;
 
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.records.reader.impl.inmemory.InMemorySequenceRecordReader;
 import org.datavec.api.writable.DoubleWritable;
@@ -19,22 +18,38 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
+/**
+ * Train various models
+ *
+ * @author Emil S. He
+ * @since 2025-04-02
+ */
 @Slf4j
 @Component
 public class ModelTraining {
 
-    private static final int EXAMPLE_LENGTH = 22;
     private static final double SPLIT_RATION = 0.8;
     private static final int BATCH_SIZE = 32;
     private static final int SCORE_ITERATIONS = 100;
 
-    public List<Double> train(List<List<Double>> dataList,
-                                    Supplier<MultiLayerNetwork> modelProvider, int epochs) {
+    /**
+     * Train the model (and save to database)
+     * @param dataList bar prices
+     * @param modelProvider model
+     * @param epochs epochs
+     * @return
+     * TODO Add function of saving the model to NoSQL database
+     */
+    public List<Double> train(int windowSize, List<List<Double>> dataList,
+                              Supplier<MultiLayerNetwork> modelProvider, int epochs) {
         // Split the data
-        List<List<List<Writable>>> allData = buildSequenceData(dataList);
-        if (allData.size() <= EXAMPLE_LENGTH) return Collections.emptyList();
-        long splitIndex = Math.round(allData.size() * SPLIT_RATION);
+        List<List<List<Writable>>> allData = buildSequenceData(windowSize, dataList);
+        if (allData.size() <= windowSize) {
+            log.info("All data's size {} should be larger than the indicated window size.", allData.size());
+            return Collections.emptyList();
+        }
 
+        long splitIndex = Math.round(allData.size() * SPLIT_RATION);
         List<List<List<Writable>>> trainData = allData.stream().limit(splitIndex).toList();
         List<List<List<Writable>>> testData = allData.stream().skip(splitIndex).toList();
 
@@ -107,20 +122,17 @@ public class ModelTraining {
             }
         }
 
-        List<Double> finalPredictionList = new ArrayList<>();
-        for (List<Double> price : testPredictData) {
-            finalPredictionList.add(price.get(0));
-        }
-
-        return finalPredictionList;
+        return testPredictData.stream()
+                .map(price -> price.get(0))
+                .toList();
     }
 
-    private List<List<List<Writable>>> buildSequenceData(List<List<Double>> barPrices) {
+    private List<List<List<Writable>>> buildSequenceData(int windowSize, List<List<Double>> barPrices) {
         List<List<List<Writable>>> data = new ArrayList<>();
 
-        for (int i = 0; i < barPrices.get(0).size() - EXAMPLE_LENGTH; i++) {
+        for (int i = 0; i < barPrices.get(0).size() - windowSize; i++) {
             List<List<Writable>> sequence = new ArrayList<>();
-            int endIndex = i + EXAMPLE_LENGTH;
+            int endIndex = i + windowSize;
 
             for (int j = i; j < endIndex; j++) {
                 List<Writable> features = new ArrayList<>();
@@ -129,7 +141,7 @@ public class ModelTraining {
                 features.add(new DoubleWritable(barPrices.get(0).get(j))); // open
                 features.add(new DoubleWritable(barPrices.get(3).get(j))); // close
 
-                // labels
+                // Labels
                 features.add(new DoubleWritable(barPrices.get(0).get(j + 1))); // open
                 sequence.add(features);
             }

@@ -13,7 +13,6 @@ import org.imperial.fastquantanalysis.constant.Sort;
 import org.imperial.fastquantanalysis.constant.Timespan;
 import org.imperial.fastquantanalysis.factory.AggregatesParametersFactory;
 import org.jetbrains.annotations.NotNull;
-import org.ta4j.core.Bar;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -136,11 +135,11 @@ public class CryptoHttpClientUtil {
         List<AggregateDTO> results = aggregatesBlocking.getResults();
 
         List<List<Double>> barPricesWithVolume = Arrays.asList(
-                results.stream().map(AggregateDTO::getOpen).collect(Collectors.toList()),
-                results.stream().map(AggregateDTO::getHigh).collect(Collectors.toList()),
-                results.stream().map(AggregateDTO::getLow).collect(Collectors.toList()),
-                results.stream().map(AggregateDTO::getClose).collect(Collectors.toList()),
-                results.stream().map(AggregateDTO::getVolume).collect(Collectors.toList())
+                results.stream().map(AggregateDTO::getOpen).collect(Collectors.toList()), // 0: open
+                results.stream().map(AggregateDTO::getHigh).collect(Collectors.toList()), // 1: high
+                results.stream().map(AggregateDTO::getLow).collect(Collectors.toList()), // 2: low
+                results.stream().map(AggregateDTO::getClose).collect(Collectors.toList()), // 3: close
+                results.stream().map(AggregateDTO::getVolume).collect(Collectors.toList()) // 4: volume
 
         );
 
@@ -185,8 +184,8 @@ public class CryptoHttpClientUtil {
         List<List<Double>> barPrices = Arrays.asList(
                 results.stream().map(AggregateDTO::getOpen).collect(Collectors.toList()), // 0: open prices
                 results.stream().map(AggregateDTO::getHigh).collect(Collectors.toList()), // 1: high prices
-                results.stream().map(AggregateDTO::getLow).collect(Collectors.toList()), // 2. low prices
-                results.stream().map(AggregateDTO::getClose).collect(Collectors.toList()) // 3. close prices
+                results.stream().map(AggregateDTO::getLow).collect(Collectors.toList()), // 2: low prices
+                results.stream().map(AggregateDTO::getClose).collect(Collectors.toList()) // 3: close prices
         );
 
         barPrices.forEach(CryptoHttpClientUtil::replaceNullWithPrevious);

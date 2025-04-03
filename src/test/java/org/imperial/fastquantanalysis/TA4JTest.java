@@ -74,7 +74,5 @@ public class TA4JTest {
         // Total return of our strategy vs total return of a buy-and-hold strategy
         AnalysisCriterion vsBuyAndHold = new VersusEnterAndHoldCriterion(new ReturnCriterion());
         System.out.println("Our return vs buy-and-hold return: " + vsBuyAndHold.calculate(barSeries, tradingRecord));
-
-
     }
 }

@@ -99,7 +99,6 @@ public class QuantAnalysisCryptoController {
      * @param atrMultiplier ATR multiplier
      * @return OK or fail message
      * @postmantest untested
-     * TODO Unfinished
      */
     @PostMapping("/ema/stop/loss/atr")
     @ResponseStatus(value = HttpStatus.OK)
