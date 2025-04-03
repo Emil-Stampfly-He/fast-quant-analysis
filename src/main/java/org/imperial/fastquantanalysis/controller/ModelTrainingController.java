@@ -50,7 +50,7 @@ public class ModelTrainingController {
             @Parameter(name = "Model kind") @RequestParam ModelKind modelKind,
             @Parameter(name = "Window size") @RequestParam int windowSize,
             @Parameter(name = "Training epochs") @RequestParam int epochs,
-            @Parameter(name = "Input size") int inputSize,
+            @Parameter(name = "Input size, not used in CNN-RNN hybrid default model") int inputSize,
             @Parameter(name = "Output size") @RequestParam int outPutSize) {
         return modelTrainingService.trainModel(polygonApiKey, cryptoAggregatesDTO, modelKind,
                 windowSize, epochs, inputSize, outPutSize);
@@ -76,7 +76,7 @@ public class ModelTrainingController {
     @PostMapping("/customized")
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Train customized models")
-    public ResponseEntity<List<Double>> trainCustomizedModel(
+    public ResponseEntity<?> trainCustomizedModel(
             @Parameter(name = "User's polygon API key") @RequestParam("polygon_api_key") String polygonApiKey,
             @Parameter(name = "DTO for carrying necessary information") @RequestBody CryptoAggregatesDTO cryptoAggregatesDTO,
             @Parameter(name = "Model kind") @RequestParam ModelKind modelKind,
@@ -95,22 +95,22 @@ public class ModelTrainingController {
 
     /**
      * Train customized CNN-RNN hybrid models
-     * @param polygonApiKey
-     * @param cryptoAggregatesDTO
-     * @param modelKind
-     * @param seed
-     * @param learningRate
-     * @param numFeatures
-     * @param numFilters
-     * @param kernelWidth
-     * @param poolWidth
-     * @param lstmHiddenSize
-     * @param momentum
-     * @param dropoutRate
-     * @param timeSteps
-     * @param epochs
-     * @param outPutSize
-     * @return
+     * @param polygonApiKey User's polygon API key
+     * @param cryptoAggregatesDTO DTO for carrying necessary information
+     * @param modelKind Model kind
+     * @param seed Seed
+     * @param learningRate Learning rate
+     * @param numFeatures Number of features per time step
+     * @param numFilters Number of CNN convolution kernels
+     * @param kernelWidth Convolution kernel width (height fixed to 1 to achieve 1D convolution)
+     * @param poolWidth Pooling window width (height of 1)
+     * @param lstmHiddenSize Number of LSTM hidden layer cells
+     * @param momentum Momentum
+     * @param dropoutRate Drop out rate
+     * @param timeSteps Input sequence length
+     * @param epochs Training epochs
+     * @param outPutSize Output size
+     * @return the model
      * @postmantest untested
      * TODO Unfinished
      */

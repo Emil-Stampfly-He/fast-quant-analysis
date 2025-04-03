@@ -18,7 +18,7 @@ public interface IModelTrainingService {
                                             ModelKind modelKind, int windowSize, int epochs,
                                             int inputSize, int outPutSize);
 
-    ResponseEntity<List<Double>> trainCustomizedModel(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO,
+    ResponseEntity<?> trainCustomizedModel(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO,
                                                       ModelKind modelKind, long seed, double learningRate,
                                                       double momentum, double dropoutRate, int windowSize,
                                                       int epochs, int inputSize, int outPutSize);

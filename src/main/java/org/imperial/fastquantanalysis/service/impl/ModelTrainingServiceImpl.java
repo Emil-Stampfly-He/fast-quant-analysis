@@ -15,7 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -79,15 +81,49 @@ public class ModelTrainingServiceImpl implements IModelTrainingService {
     }
 
     @Override
-    public ResponseEntity<List<Double>> trainCustomizedModel(String polygonApiKey,
+    @Transactional
+    public ResponseEntity<?> trainCustomizedModel(String polygonApiKey,
                                                              CryptoAggregatesDTO cryptoAggregatesDTO,
                                                              ModelKind modelKind, long seed, double learningRate,
                                                              double momentum, double dropoutRate, int windowSize,
                                                              int epochs, int inputSize, int outPutSize) {
-        return null;
+        HttpClientProvider okHttpClientProvider = CryptoHttpClientUtil.getOkHttpClientProvider();
+        PolygonRestClient polygonRestClient = new PolygonRestClient(
+                polygonApiKey,
+                okHttpClientProvider
+        );
+
+        List<List<Double>> barPrices = CryptoHttpClientUtil.getBarPrices(
+                cryptoAggregatesDTO.getTickerName(),
+                cryptoAggregatesDTO.getMultiplier(),
+                cryptoAggregatesDTO.getTimespan(),
+                cryptoAggregatesDTO.getFromDate(),
+                cryptoAggregatesDTO.getToDate(),
+                cryptoAggregatesDTO.getUnadjusted(),
+                cryptoAggregatesDTO.getLimit(),
+                cryptoAggregatesDTO.getSort(),
+                polygonRestClient
+        );
+
+        Optional<Supplier<MultiLayerNetwork>> safeModelProvider = switch (modelKind) {
+            case LSTM_RNN -> Optional.of(() -> modelConfig.getLSTMRNNModel(seed, learningRate, momentum, dropoutRate,
+                    inputSize, outPutSize));
+            case LSTM_DENSE_RNN -> Optional.of(() -> modelConfig.getLSTMDenseRNNModel(seed, learningRate, momentum,
+                    dropoutRate, inputSize, outPutSize));
+            case CNN_RNN_HYBRID -> Optional.empty();
+        };
+
+        if (safeModelProvider.isEmpty()) {
+            return ResponseEntity.badRequest().body("CNN-RNN hybrid model should not be chosen here.");
+        }
+
+        Supplier<MultiLayerNetwork> modelProvider = safeModelProvider.get();
+        List<Double> finalPredictData = modelTraining.train(windowSize, barPrices, modelProvider, epochs);
+        return ResponseEntity.ok(finalPredictData);
     }
 
     @Override
+    @Transactional
     public ResponseEntity<List<Double>> trainCNNRNNHybridCustomizedModel(String polygonApiKey,
                                                                          CryptoAggregatesDTO cryptoAggregatesDTO,
                                                                          ModelKind modelKind, long seed,
