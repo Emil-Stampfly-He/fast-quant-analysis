@@ -11,4 +11,5 @@ This project aims to build a platform, where customers can get their specified s
 - Asynchronous message queue: Kafka
 - Data source: Polygon.io Kotlin RESTFul API
 - Data analysis and modeling: TA4J
+- Deep learning libraries: DL4J & ND4J
 - API document: Swagger
