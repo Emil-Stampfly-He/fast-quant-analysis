@@ -13,3 +13,4 @@ This project aims to build a platform, where customers can get their specified s
 - Data analysis and modeling: TA4J
 - Deep learning libraries: DL4J & ND4J
 - API document: Swagger
+- Frontend: React & Axios

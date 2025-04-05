@@ -9,6 +9,7 @@ import org.imperial.fastquantanalysis.constant.Timespan;
 import org.imperial.fastquantanalysis.model.ModelConfig;
 import org.imperial.fastquantanalysis.model.ModelTraining;
 import org.imperial.fastquantanalysis.util.CryptoHttpClientUtil;
+import org.imperial.fastquantanalysis.vo.TrainingResultVO;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -49,12 +50,12 @@ public class ModelTest {
 
         System.out.println(barPrices);
 
-        List<Double> testPredictData = modelTraining.train(
+        TrainingResultVO trainingResultVO = modelTraining.train(
                 22,
                 barPrices,
                 () -> modelConfig.getLSTMRNNDefaultModel(2, 1),
                 5);
 
-        System.out.println(testPredictData);
+        System.out.println(trainingResultVO);
     }
 }
