@@ -71,7 +71,6 @@ public class ModelTrainingController {
      * @param outPutSize Output size
      * @return Final predicted data list
      * @postmantest untested
-     * TODO Unfinished
      */
     @PostMapping("/customized")
     @ResponseStatus(value = HttpStatus.OK)
@@ -110,6 +109,7 @@ public class ModelTrainingController {
      * @param timeSteps Input sequence length
      * @param epochs Training epochs
      * @param outPutSize Output size
+     * @param windowSize Window size
      * @return the model
      * @postmantest untested
      * TODO Unfinished
@@ -117,7 +117,7 @@ public class ModelTrainingController {
     @PostMapping("/customized/cnn-rnn-hybrid")
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Train customized CNN-RNN hybrid models")
-    public ResponseEntity<List<Double>> trainCNNRNNHybridCustomizedModel(
+    public ResponseEntity<?> trainCNNRNNHybridCustomizedModel(
             @Parameter(name = "User's polygon API key") @RequestParam("polygon_api_key") String polygonApiKey,
             @Parameter(name = "DTO for carrying necessary information") @RequestBody CryptoAggregatesDTO cryptoAggregatesDTO,
             @Parameter(name = "Model kind") @RequestParam ModelKind modelKind,
@@ -132,9 +132,10 @@ public class ModelTrainingController {
             @Parameter(name = "Dropout rate") @RequestParam double dropoutRate,
             @Parameter(name = "Input sequence length") @RequestParam int timeSteps,
             @Parameter(name = "Training epochs") @RequestParam int epochs,
-            @Parameter(name = "Output size") @RequestParam int outPutSize) {
+            @Parameter(name = "Output size") @RequestParam int outPutSize,
+            @Parameter(name = "Window size") @RequestParam int windowSize) {
         return modelTrainingService.trainCNNRNNHybridCustomizedModel(polygonApiKey, cryptoAggregatesDTO,
                 modelKind, seed, learningRate, numFeatures, numFilters, kernelWidth, poolWidth, lstmHiddenSize,
-                momentum, dropoutRate, timeSteps, epochs, outPutSize);
+                momentum, dropoutRate, timeSteps, epochs, outPutSize, windowSize);
     }
 }

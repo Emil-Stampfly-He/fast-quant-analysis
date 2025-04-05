@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -49,9 +48,10 @@ public class ModelTrainingServiceImpl implements IModelTrainingService {
      */
     @Override
     @Transactional // Avoid saving amputated models
-    public ResponseEntity<List<Double>> trainModel(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO,
-                                        ModelKind modelKind, int windowSize, int epochs,
-                                        int inputSize, int outPutSize) {
+    public ResponseEntity<List<Double>> trainModel(String polygonApiKey,
+                                                   CryptoAggregatesDTO cryptoAggregatesDTO,
+                                                   ModelKind modelKind, int windowSize, int epochs,
+                                                   int inputSize, int outPutSize) {
         HttpClientProvider okHttpClientProvider = CryptoHttpClientUtil.getOkHttpClientProvider();
         PolygonRestClient polygonRestClient = new PolygonRestClient(
                 polygonApiKey,
@@ -83,10 +83,10 @@ public class ModelTrainingServiceImpl implements IModelTrainingService {
     @Override
     @Transactional
     public ResponseEntity<?> trainCustomizedModel(String polygonApiKey,
-                                                             CryptoAggregatesDTO cryptoAggregatesDTO,
-                                                             ModelKind modelKind, long seed, double learningRate,
-                                                             double momentum, double dropoutRate, int windowSize,
-                                                             int epochs, int inputSize, int outPutSize) {
+                                                  CryptoAggregatesDTO cryptoAggregatesDTO,
+                                                  ModelKind modelKind, long seed, double learningRate,
+                                                  double momentum, double dropoutRate, int windowSize,
+                                                  int epochs, int inputSize, int outPutSize) {
         HttpClientProvider okHttpClientProvider = CryptoHttpClientUtil.getOkHttpClientProvider();
         PolygonRestClient polygonRestClient = new PolygonRestClient(
                 polygonApiKey,
@@ -124,16 +124,44 @@ public class ModelTrainingServiceImpl implements IModelTrainingService {
 
     @Override
     @Transactional
-    public ResponseEntity<List<Double>> trainCNNRNNHybridCustomizedModel(String polygonApiKey,
-                                                                         CryptoAggregatesDTO cryptoAggregatesDTO,
-                                                                         ModelKind modelKind, long seed,
-                                                                         double learningRate, int numFeatures,
-                                                                         int numFilters, int kernelWidth,
-                                                                         int poolWidth, int lstmHiddenSize,
-                                                                         double momentum, double dropoutRate,
-                                                                         int timeSteps, int epochs, int outPutSize) {
-        return null;
+    public ResponseEntity<?> trainCNNRNNHybridCustomizedModel(String polygonApiKey,
+                                                              CryptoAggregatesDTO cryptoAggregatesDTO,
+                                                              ModelKind modelKind, long seed,
+                                                              double learningRate, int numFeatures,
+                                                              int numFilters, int kernelWidth,
+                                                              int poolWidth, int lstmHiddenSize,
+                                                              double momentum, double dropoutRate,
+                                                              int timeSteps, int epochs, int outPutSize,
+                                                              int windowSize) {
+        HttpClientProvider okHttpClientProvider = CryptoHttpClientUtil.getOkHttpClientProvider();
+        PolygonRestClient polygonRestClient = new PolygonRestClient(
+                polygonApiKey,
+                okHttpClientProvider
+        );
+
+        List<List<Double>> barPrices = CryptoHttpClientUtil.getBarPrices(
+                cryptoAggregatesDTO.getTickerName(),
+                cryptoAggregatesDTO.getMultiplier(),
+                cryptoAggregatesDTO.getTimespan(),
+                cryptoAggregatesDTO.getFromDate(),
+                cryptoAggregatesDTO.getToDate(),
+                cryptoAggregatesDTO.getUnadjusted(),
+                cryptoAggregatesDTO.getLimit(),
+                cryptoAggregatesDTO.getSort(),
+                polygonRestClient
+        );
+
+        Optional<Supplier<MultiLayerNetwork>> safeModelProvider = switch (modelKind) {
+            case CNN_RNN_HYBRID -> Optional.of(() -> modelConfig.getCNNRNNHybridModel(seed, learningRate, momentum, numFeatures,
+                    numFilters, kernelWidth, poolWidth, lstmHiddenSize, dropoutRate, timeSteps, outPutSize));
+            case LSTM_RNN, LSTM_DENSE_RNN -> Optional.empty();
+        };
+
+        if (safeModelProvider.isEmpty()) {
+            return ResponseEntity.badRequest().body("LSTM-RNN or LSTM-Dense-RNN model should not be chosen here.");
+        }
+
+        List<Double> finalPredictData = modelTraining.train(windowSize, barPrices, safeModelProvider.get(), epochs);
+        return ResponseEntity.ok(finalPredictData);
     }
-
-
 }

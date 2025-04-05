@@ -19,15 +19,15 @@ public interface IModelTrainingService {
                                             int inputSize, int outPutSize);
 
     ResponseEntity<?> trainCustomizedModel(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO,
-                                                      ModelKind modelKind, long seed, double learningRate,
-                                                      double momentum, double dropoutRate, int windowSize,
-                                                      int epochs, int inputSize, int outPutSize);
+                                           ModelKind modelKind, long seed, double learningRate,
+                                           double momentum, double dropoutRate, int windowSize,
+                                           int epochs, int inputSize, int outPutSize);
 
-    ResponseEntity<List<Double>> trainCNNRNNHybridCustomizedModel(String polygonApiKey,
-                                                                  CryptoAggregatesDTO cryptoAggregatesDTO,
-                                                                  ModelKind modelKind, long seed, double learningRate,
-                                                                  int numFeatures, int numFilters, int kernelWidth,
-                                                                  int poolWidth, int lstmHiddenSize, double momentum,
-                                                                  double dropoutRate, int timeSteps, int epochs,
-                                                                  int outPutSize);
+    ResponseEntity<?> trainCNNRNNHybridCustomizedModel(String polygonApiKey,
+                                                       CryptoAggregatesDTO cryptoAggregatesDTO,
+                                                       ModelKind modelKind, long seed, double learningRate,
+                                                       int numFeatures, int numFilters, int kernelWidth,
+                                                       int poolWidth, int lstmHiddenSize, double momentum,
+                                                       double dropoutRate, int timeSteps, int epochs,
+                                                       int outPutSize, int windowSize);
 }
