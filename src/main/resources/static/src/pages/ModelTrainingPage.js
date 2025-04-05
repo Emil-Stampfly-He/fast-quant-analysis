@@ -4,7 +4,6 @@ import { apiClient } from '../api';
 const ModelTrainingPage = () => {
     const [defaultForm, setDefaultForm] = useState({
         polygonApiKey: '',
-        // JSON格式数据需包含：tickerName, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit
         cryptoData: '',
         modelKind: '', // 可选值：LSTM_RNN, LSTM_DENSE_RNN, CNN_RNN_HYBRID
         windowSize: 20,
@@ -15,10 +14,8 @@ const ModelTrainingPage = () => {
 
     const [customizedForm, setCustomizedForm] = useState({
         polygonApiKey: '',
-        // JSON格式数据需包含：tickerName, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit
         cryptoData: '',
-        // 仅支持 LSTM_RNN 或 LSTM_DENSE_RNN
-        modelKind: '',
+        modelKind: '', // 仅支持 LSTM_RNN 或 LSTM_DENSE_RNN
         seed: 12345,
         learningRate: 0.001,
         momentum: 0.9,
@@ -31,10 +28,8 @@ const ModelTrainingPage = () => {
 
     const [cnnRnnForm, setCnnRnnForm] = useState({
         polygonApiKey: '',
-        // JSON格式数据需包含：tickerName, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit
         cryptoData: '',
-        // 仅支持 CNN_RNN_HYBRID
-        modelKind: '',
+        modelKind: '', // 仅支持 CNN_RNN_HYBRID
         seed: 12345,
         learningRate: 0.001,
         numFeatures: 10,
@@ -62,62 +57,61 @@ const ModelTrainingPage = () => {
                 url += '?' + queryString;
             }
             const response = await apiClient.post(url, JSON.parse(formData));
-            setMessage(`调用 ${endpoint} 成功，返回数据：` + JSON.stringify(response.data));
+            setMessage(`调用 ${endpoint} 成功，返回数据：${JSON.stringify(response.data)}`);
         } catch (error) {
-            setMessage(`调用 ${endpoint} 失败：` + error.message);
+            setMessage(`调用 ${endpoint} 失败：${error.message}`);
         }
     };
 
     return (
-        <div>
+        <div className="container">
             <h2>模型训练</h2>
 
-            {/* 1. 训练默认模型 */}
-            <div style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '20px' }}>
+            {/* 训练默认模型 */}
+            <div className="card">
                 <h3>训练默认模型</h3>
                 <input
                     type="text"
                     placeholder="Polygon API Key"
                     value={defaultForm.polygonApiKey}
                     onChange={e => setDefaultForm({ ...defaultForm, polygonApiKey: e.target.value })}
-                /><br/>
+                />
                 <textarea
-                    placeholder="请输入 CryptoAggregatesDTO JSON 数据..."
+                    placeholder="请输入 CryptoAggregatesDTO JSON 数据，包含：tickerName, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit"
                     value={defaultForm.cryptoData}
                     onChange={e => setDefaultForm({ ...defaultForm, cryptoData: e.target.value })}
                     rows={4}
-                    cols={50}
-                /><br/>
+                />
                 <input
                     type="text"
                     placeholder="Model Kind (LSTM_RNN, LSTM_DENSE_RNN, CNN_RNN_HYBRID)"
                     value={defaultForm.modelKind}
                     onChange={e => setDefaultForm({ ...defaultForm, modelKind: e.target.value })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="Window Size"
                     value={defaultForm.windowSize}
                     onChange={e => setDefaultForm({ ...defaultForm, windowSize: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="Epochs"
                     value={defaultForm.epochs}
                     onChange={e => setDefaultForm({ ...defaultForm, epochs: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="Input Size"
                     value={defaultForm.inputSize}
                     onChange={e => setDefaultForm({ ...defaultForm, inputSize: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="Output Size"
                     value={defaultForm.outPutSize}
                     onChange={e => setDefaultForm({ ...defaultForm, outPutSize: Number(e.target.value) })}
-                /><br/>
+                />
                 <button onClick={() =>
                     handleSubmit(
                         '/models/default',
@@ -136,79 +130,78 @@ const ModelTrainingPage = () => {
                 </button>
             </div>
 
-            {/* 2. 训练定制模型 */}
-            <div style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '20px' }}>
+            {/* 训练定制模型 */}
+            <div className="card">
                 <h3>训练定制模型</h3>
                 <input
                     type="text"
                     placeholder="Polygon API Key"
                     value={customizedForm.polygonApiKey}
                     onChange={e => setCustomizedForm({ ...customizedForm, polygonApiKey: e.target.value })}
-                /><br/>
+                />
                 <textarea
-                    placeholder="请输入 CryptoAggregatesDTO JSON 数据..."
+                    placeholder="请输入 CryptoAggregatesDTO JSON 数据，包含：tickerName, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit"
                     value={customizedForm.cryptoData}
                     onChange={e => setCustomizedForm({ ...customizedForm, cryptoData: e.target.value })}
                     rows={4}
-                    cols={50}
-                /><br/>
+                />
                 <input
                     type="text"
                     placeholder="Model Kind (仅支持 LSTM_RNN 或 LSTM_DENSE_RNN)"
                     value={customizedForm.modelKind}
                     onChange={e => setCustomizedForm({ ...customizedForm, modelKind: e.target.value })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="Seed"
                     value={customizedForm.seed}
                     onChange={e => setCustomizedForm({ ...customizedForm, seed: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     step="0.001"
                     placeholder="Learning Rate"
                     value={customizedForm.learningRate}
                     onChange={e => setCustomizedForm({ ...customizedForm, learningRate: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     step="0.1"
                     placeholder="Momentum"
                     value={customizedForm.momentum}
                     onChange={e => setCustomizedForm({ ...customizedForm, momentum: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     step="0.1"
                     placeholder="Dropout Rate"
                     value={customizedForm.dropoutRate}
                     onChange={e => setCustomizedForm({ ...customizedForm, dropoutRate: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="Window Size"
                     value={customizedForm.windowSize}
                     onChange={e => setCustomizedForm({ ...customizedForm, windowSize: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="Epochs"
                     value={customizedForm.epochs}
                     onChange={e => setCustomizedForm({ ...customizedForm, epochs: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="Input Size"
                     value={customizedForm.inputSize}
                     onChange={e => setCustomizedForm({ ...customizedForm, inputSize: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="Output Size"
                     value={customizedForm.outPutSize}
                     onChange={e => setCustomizedForm({ ...customizedForm, outPutSize: Number(e.target.value) })}
-                /><br/>
+                />
                 <button onClick={() =>
                     handleSubmit(
                         '/models/customized',
@@ -231,109 +224,108 @@ const ModelTrainingPage = () => {
                 </button>
             </div>
 
-            {/* 3. 训练 CNN-RNN Hybrid 定制模型 */}
-            <div style={{ border: '1px solid #ccc', padding: '10px' }}>
+            {/* 训练 CNN-RNN Hybrid 定制模型 */}
+            <div className="card">
                 <h3>训练 CNN-RNN Hybrid 定制模型</h3>
                 <input
                     type="text"
                     placeholder="Polygon API Key"
                     value={cnnRnnForm.polygonApiKey}
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, polygonApiKey: e.target.value })}
-                /><br/>
+                />
                 <textarea
-                    placeholder="请输入 CryptoAggregatesDTO JSON 数据..."
+                    placeholder="请输入 CryptoAggregatesDTO JSON 数据，包含：tickerName, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit"
                     value={cnnRnnForm.cryptoData}
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, cryptoData: e.target.value })}
                     rows={4}
-                    cols={50}
-                /><br/>
+                />
                 <input
                     type="text"
                     placeholder="Model Kind (仅支持 CNN_RNN_HYBRID)"
                     value={cnnRnnForm.modelKind}
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, modelKind: e.target.value })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="Seed"
                     value={cnnRnnForm.seed}
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, seed: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     step="0.001"
                     placeholder="Learning Rate"
                     value={cnnRnnForm.learningRate}
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, learningRate: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="Number of Features"
                     value={cnnRnnForm.numFeatures}
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, numFeatures: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="Number of Filters"
                     value={cnnRnnForm.numFilters}
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, numFilters: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="Kernel Width"
                     value={cnnRnnForm.kernelWidth}
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, kernelWidth: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="Pool Width"
                     value={cnnRnnForm.poolWidth}
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, poolWidth: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="LSTM Hidden Size"
                     value={cnnRnnForm.lstmHiddenSize}
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, lstmHiddenSize: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     step="0.1"
                     placeholder="Momentum"
                     value={cnnRnnForm.momentum}
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, momentum: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     step="0.1"
                     placeholder="Dropout Rate"
                     value={cnnRnnForm.dropoutRate}
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, dropoutRate: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="Time Steps"
                     value={cnnRnnForm.timeSteps}
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, timeSteps: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="Epochs"
                     value={cnnRnnForm.epochs}
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, epochs: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="Output Size"
                     value={cnnRnnForm.outPutSize}
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, outPutSize: Number(e.target.value) })}
-                /><br/>
+                />
                 <input
                     type="number"
                     placeholder="Window Size"
                     value={cnnRnnForm.windowSize}
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, windowSize: Number(e.target.value) })}
-                /><br/>
+                />
                 <button onClick={() =>
                     handleSubmit(
                         '/models/customized/cnn-rnn-hybrid',
@@ -361,10 +353,9 @@ const ModelTrainingPage = () => {
                 </button>
             </div>
 
-            {message && <p>{message}</p>}
+            {message && <div className="message">{message}</div>}
         </div>
     );
 };
 
 export default ModelTrainingPage;
-

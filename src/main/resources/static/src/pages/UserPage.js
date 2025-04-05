@@ -10,28 +10,28 @@ const UserPage = () => {
 
     const sendCode = async () => {
         try {
-            const response = await apiClient.post(`/user/code?email_id=${encodeURIComponent(email)}`);
-            setMessage('Verification code sent');
+            await apiClient.post(`/user/code?email_id=${encodeURIComponent(email)}`);
+            setMessage('Verification code sent successfully.');
         } catch (error) {
-            setMessage('Failed to send verification code');
+            setMessage('Failed to send verification code.');
         }
     };
 
     const login = async () => {
         try {
-            const response = await apiClient.post('/user/login', loginData);
-            setMessage('Logged in successfully');
+            await apiClient.post('/user/login', loginData);
+            setMessage('Logged in successfully.');
         } catch (error) {
-            setMessage('Failed to log in');
+            setMessage('Failed to log in.');
         }
     };
 
     const updateUser = async () => {
         try {
-            const response = await apiClient.put('/user/update', updateData);
-            setMessage('Update successfully');
+            await apiClient.put('/user/update', updateData);
+            setMessage('User information updated successfully.');
         } catch (error) {
-            setMessage('Failed to update user');
+            setMessage('Failed to update user information.');
         }
     };
 
@@ -39,75 +39,77 @@ const UserPage = () => {
         try {
             const response = await apiClient.get('/user/me');
             setUserInfo(response.data);
+            setMessage('User information retrieved successfully.');
         } catch (error) {
-            setMessage('Failed to fetch user info');
+            setMessage('Failed to fetch user information.');
         }
     };
 
     return (
-        <div>
+        <div className="container">
             <h2>User Management</h2>
-            <div style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '20px' }}>
-                <h3>Sending verification code</h3>
+
+            <div className="card">
+                <h3>Send Verification Code</h3>
                 <input
                     type="email"
-                    placeholder="Please input your email address"
+                    placeholder="Enter your email address"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                 />
-                <button onClick={sendCode}>发送验证码</button>
+                <button onClick={sendCode}>Send Code</button>
             </div>
 
-            <div style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '20px' }}>
-                <h3>Log in</h3>
+            <div className="card">
+                <h3>Log In</h3>
                 <input
                     type="email"
-                    placeholder="email"
+                    placeholder="Email"
                     value={loginData.email}
                     onChange={e => setLoginData({ ...loginData, email: e.target.value })}
-                /><br/>
+                />
                 <input
                     type="text"
-                    placeholder="verification code"
+                    placeholder="Verification Code"
                     value={loginData.code}
                     onChange={e => setLoginData({ ...loginData, code: e.target.value })}
-                /><br/>
+                />
                 <input
                     type="password"
-                    placeholder="password"
+                    placeholder="Password"
                     value={loginData.password}
                     onChange={e => setLoginData({ ...loginData, password: e.target.value })}
-                /><br/>
-                <button onClick={login}>Log in</button>
+                />
+                <button onClick={login}>Log In</button>
             </div>
 
-            <div style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '20px' }}>
-                <h3>Update user info</h3>
+            <div className="card">
+                <h3>Update User Information</h3>
                 <input
                     type="text"
-                    placeholder="name"
+                    placeholder="Name"
                     value={updateData.name}
                     onChange={e => setUpdateData({ ...updateData, name: e.target.value })}
-                /><br/>
+                />
                 <input
                     type="date"
-                    placeholder="birthday"
+                    placeholder="Birthday"
                     value={updateData.birthday}
                     onChange={e => setUpdateData({ ...updateData, birthday: e.target.value })}
-                /><br/>
-                <button onClick={updateUser}>更新信息</button>
+                />
+                <button onClick={updateUser}>Update Info</button>
             </div>
 
-            <div style={{ border: '1px solid #ccc', padding: '10px' }}>
-                <h3>Fetching user info</h3>
-                <button onClick={fetchUserInfo}>Fetching info</button>
-                {userInfo && (
-                    <pre>{JSON.stringify(userInfo, null, 2)}</pre>
-                )}
+            <div className="card">
+                <h3>Fetch User Information</h3>
+                <button onClick={fetchUserInfo}>Get Info</button>
+                {userInfo && <pre>{JSON.stringify(userInfo, null, 2)}</pre>}
             </div>
-            {message && <p>{message}</p>}
+
+            {message && <div className="message">{message}</div>}
         </div>
     );
 };
 
 export default UserPage;
+
