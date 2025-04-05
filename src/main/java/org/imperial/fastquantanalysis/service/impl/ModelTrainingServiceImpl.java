@@ -11,10 +11,12 @@ import org.imperial.fastquantanalysis.model.ModelConfig;
 import org.imperial.fastquantanalysis.model.ModelTraining;
 import org.imperial.fastquantanalysis.service.IModelTrainingService;
 import org.imperial.fastquantanalysis.util.CryptoHttpClientUtil;
+import org.imperial.fastquantanalysis.vo.TrainingResultVO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -44,14 +46,14 @@ public class ModelTrainingServiceImpl implements IModelTrainingService {
      * @param epochs Training epochs
      * @param inputSize Input size of the model
      * @param outPutSize Output size of the model
-     * @return Final predicted data list
+     * @return Training result
      */
     @Override
     @Transactional // Avoid saving amputated models
-    public ResponseEntity<List<Double>> trainModel(String polygonApiKey,
-                                                   CryptoAggregatesDTO cryptoAggregatesDTO,
-                                                   ModelKind modelKind, int windowSize, int epochs,
-                                                   int inputSize, int outPutSize) {
+    public ResponseEntity<TrainingResultVO> trainModel(String polygonApiKey,
+                                                       CryptoAggregatesDTO cryptoAggregatesDTO,
+                                                       ModelKind modelKind, int windowSize, int epochs,
+                                                       int inputSize, int outPutSize) {
         HttpClientProvider okHttpClientProvider = CryptoHttpClientUtil.getOkHttpClientProvider();
         PolygonRestClient polygonRestClient = new PolygonRestClient(
                 polygonApiKey,
@@ -75,18 +77,32 @@ public class ModelTrainingServiceImpl implements IModelTrainingService {
             case LSTM_DENSE_RNN -> () -> modelConfig.getLSTMDenseRNNDefaultModel(inputSize, outPutSize);
             case CNN_RNN_HYBRID -> () -> modelConfig.getCNNRNNHybridDefaultModel(inputSize);
         };
-        List<Double> finalPredictData = modelTraining.train(windowSize, barPrices, modelProvider, epochs);
 
-        return ResponseEntity.ok(finalPredictData);
+        return ResponseEntity.ok(modelTraining.train(windowSize, barPrices, modelProvider, epochs));
     }
 
+    /**
+     * Train customized deep learning models
+     * @param polygonApiKey User's polygon API key
+     * @param cryptoAggregatesDTO DTO for carrying necessary information
+     * @param modelKind Model kind
+     * @param seed Seed
+     * @param learningRate Learning rate
+     * @param momentum Momentum
+     * @param dropoutRate Dropout rate
+     * @param windowSize Window size
+     * @param epochs Training epochs
+     * @param inputSize Input size
+     * @param outPutSize Output size
+     * @return Training result
+     */
     @Override
     @Transactional
-    public ResponseEntity<?> trainCustomizedModel(String polygonApiKey,
-                                                  CryptoAggregatesDTO cryptoAggregatesDTO,
-                                                  ModelKind modelKind, long seed, double learningRate,
-                                                  double momentum, double dropoutRate, int windowSize,
-                                                  int epochs, int inputSize, int outPutSize) {
+    public ResponseEntity<TrainingResultVO> trainCustomizedModel(String polygonApiKey,
+                                                                 CryptoAggregatesDTO cryptoAggregatesDTO,
+                                                                 ModelKind modelKind, long seed, double learningRate,
+                                                                 double momentum, double dropoutRate, int windowSize,
+                                                                 int epochs, int inputSize, int outPutSize) {
         HttpClientProvider okHttpClientProvider = CryptoHttpClientUtil.getOkHttpClientProvider();
         PolygonRestClient polygonRestClient = new PolygonRestClient(
                 polygonApiKey,
@@ -114,17 +130,36 @@ public class ModelTrainingServiceImpl implements IModelTrainingService {
         };
 
         if (safeModelProvider.isEmpty()) {
-            return ResponseEntity.badRequest().body("CNN-RNN hybrid model should not be chosen here.");
+            log.error("CNN-RNN hybrid model should not be chosen here.");
+            return ResponseEntity.badRequest().body(new TrainingResultVO(Collections.emptyList(), Double.NaN));
         }
 
-        Supplier<MultiLayerNetwork> modelProvider = safeModelProvider.get();
-        List<Double> finalPredictData = modelTraining.train(windowSize, barPrices, modelProvider, epochs);
-        return ResponseEntity.ok(finalPredictData);
+        return ResponseEntity.ok(modelTraining.train(windowSize, barPrices, safeModelProvider.get(), epochs));
     }
 
+    /**
+     * Train customized CNN-RNN hybrid models
+     * @param polygonApiKey User's polygon API key
+     * @param cryptoAggregatesDTO DTO for carrying necessary information
+     * @param modelKind Model kind
+     * @param seed Seed
+     * @param learningRate Learning rate
+     * @param numFeatures Number of features per time step
+     * @param numFilters Number of CNN convolution kernels
+     * @param kernelWidth Convolution kernel width (height fixed to 1 to achieve 1D convolution)
+     * @param poolWidth Pooling window width (height of 1)
+     * @param lstmHiddenSize Number of LSTM hidden layer cells
+     * @param momentum Momentum
+     * @param dropoutRate Drop out rate
+     * @param timeSteps Input sequence length
+     * @param epochs Training epochs
+     * @param outPutSize Output size
+     * @param windowSize Window size
+     * @return Training result
+     */
     @Override
     @Transactional
-    public ResponseEntity<?> trainCNNRNNHybridCustomizedModel(String polygonApiKey,
+    public ResponseEntity<TrainingResultVO> trainCNNRNNHybridCustomizedModel(String polygonApiKey,
                                                               CryptoAggregatesDTO cryptoAggregatesDTO,
                                                               ModelKind modelKind, long seed,
                                                               double learningRate, int numFeatures,
@@ -158,10 +193,10 @@ public class ModelTrainingServiceImpl implements IModelTrainingService {
         };
 
         if (safeModelProvider.isEmpty()) {
-            return ResponseEntity.badRequest().body("LSTM-RNN or LSTM-Dense-RNN model should not be chosen here.");
+            log.error("LSTM-RNN or LSTM-Dense-RNN model should not be chosen here.");
+            return ResponseEntity.badRequest().body(new TrainingResultVO(Collections.emptyList(), Double.NaN));
         }
 
-        List<Double> finalPredictData = modelTraining.train(windowSize, barPrices, safeModelProvider.get(), epochs);
-        return ResponseEntity.ok(finalPredictData);
+        return ResponseEntity.ok(modelTraining.train(windowSize, barPrices, safeModelProvider.get(), epochs));
     }
 }

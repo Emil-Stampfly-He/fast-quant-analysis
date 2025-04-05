@@ -2,6 +2,7 @@ package org.imperial.fastquantanalysis.service;
 
 import org.imperial.fastquantanalysis.constant.ModelKind;
 import org.imperial.fastquantanalysis.dto.CryptoAggregatesDTO;
+import org.imperial.fastquantanalysis.vo.TrainingResultVO;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -14,16 +15,16 @@ import java.util.List;
  */
 public interface IModelTrainingService {
 
-    ResponseEntity<List<Double>> trainModel(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO,
-                                            ModelKind modelKind, int windowSize, int epochs,
-                                            int inputSize, int outPutSize);
+    ResponseEntity<TrainingResultVO> trainModel(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO,
+                                                ModelKind modelKind, int windowSize, int epochs,
+                                                int inputSize, int outPutSize);
 
-    ResponseEntity<?> trainCustomizedModel(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO,
+    ResponseEntity<TrainingResultVO> trainCustomizedModel(String polygonApiKey, CryptoAggregatesDTO cryptoAggregatesDTO,
                                            ModelKind modelKind, long seed, double learningRate,
                                            double momentum, double dropoutRate, int windowSize,
                                            int epochs, int inputSize, int outPutSize);
 
-    ResponseEntity<?> trainCNNRNNHybridCustomizedModel(String polygonApiKey,
+    ResponseEntity<TrainingResultVO> trainCNNRNNHybridCustomizedModel(String polygonApiKey,
                                                        CryptoAggregatesDTO cryptoAggregatesDTO,
                                                        ModelKind modelKind, long seed, double learningRate,
                                                        int numFeatures, int numFilters, int kernelWidth,

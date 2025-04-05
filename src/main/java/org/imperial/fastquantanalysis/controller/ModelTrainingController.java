@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.imperial.fastquantanalysis.constant.ModelKind;
 import org.imperial.fastquantanalysis.dto.CryptoAggregatesDTO;
 import org.imperial.fastquantanalysis.service.IModelTrainingService;
+import org.imperial.fastquantanalysis.vo.TrainingResultVO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,13 +39,13 @@ public class ModelTrainingController {
      * @param epochs Training epochs
      * @param inputSize Input size of the model
      * @param outPutSize Output size of the model
-     * @return Final predicted data list
+     * @return Training result
      * @postmantest untested
      */
     @PostMapping("/default")
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Train default models")
-    public ResponseEntity<List<Double>> trainDefaultModel(
+    public ResponseEntity<TrainingResultVO> trainDefaultModel(
             @Parameter(name = "User's polygon API key") @RequestParam("polygon_api_key") String polygonApiKey,
             @Parameter(name = "DTO for carrying necessary information") @RequestBody CryptoAggregatesDTO cryptoAggregatesDTO,
             @Parameter(name = "Model kind") @RequestParam ModelKind modelKind,
@@ -69,13 +70,13 @@ public class ModelTrainingController {
      * @param epochs Training epochs
      * @param inputSize Input size
      * @param outPutSize Output size
-     * @return Final predicted data list
+     * @return Training result
      * @postmantest untested
      */
     @PostMapping("/customized")
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Train customized models")
-    public ResponseEntity<?> trainCustomizedModel(
+    public ResponseEntity<TrainingResultVO> trainCustomizedModel(
             @Parameter(name = "User's polygon API key") @RequestParam("polygon_api_key") String polygonApiKey,
             @Parameter(name = "DTO for carrying necessary information") @RequestBody CryptoAggregatesDTO cryptoAggregatesDTO,
             @Parameter(name = "Model kind") @RequestParam ModelKind modelKind,
@@ -110,14 +111,13 @@ public class ModelTrainingController {
      * @param epochs Training epochs
      * @param outPutSize Output size
      * @param windowSize Window size
-     * @return the model
+     * @return Training result
      * @postmantest untested
-     * TODO Unfinished
      */
     @PostMapping("/customized/cnn-rnn-hybrid")
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Train customized CNN-RNN hybrid models")
-    public ResponseEntity<?> trainCNNRNNHybridCustomizedModel(
+    public ResponseEntity<TrainingResultVO> trainCNNRNNHybridCustomizedModel(
             @Parameter(name = "User's polygon API key") @RequestParam("polygon_api_key") String polygonApiKey,
             @Parameter(name = "DTO for carrying necessary information") @RequestBody CryptoAggregatesDTO cryptoAggregatesDTO,
             @Parameter(name = "Model kind") @RequestParam ModelKind modelKind,

@@ -7,6 +7,7 @@ import org.datavec.api.writable.Writable;
 import org.deeplearning4j.datasets.datavec.SequenceRecordReaderDataSetIterator;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.imperial.fastquantanalysis.vo.TrainingResultVO;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerMinMaxScaler;
@@ -34,19 +35,20 @@ public class ModelTraining {
 
     /**
      * Train the model (and save to database)
+     * @param windowSize window size
      * @param dataList bar prices
      * @param modelProvider model
      * @param epochs epochs
-     * @return
+     * @return Training result
      * TODO Add function of saving the model to NoSQL database
      */
-    public List<Double> train(int windowSize, List<List<Double>> dataList,
+    public TrainingResultVO train(int windowSize, List<List<Double>> dataList,
                               Supplier<MultiLayerNetwork> modelProvider, int epochs) {
         // Split the data
         List<List<List<Writable>>> allData = buildSequenceData(windowSize, dataList);
         if (allData.size() <= windowSize) {
             log.info("All data's size {} should be larger than the indicated window size.", allData.size());
-            return Collections.emptyList();
+            return new TrainingResultVO(Collections.emptyList(), Double.NaN);
         }
 
         long splitIndex = Math.round(allData.size() * SPLIT_RATION);
@@ -98,6 +100,8 @@ public class ModelTraining {
 
         // Test the model
         List<List<Double>> testPredictData = new ArrayList<>();
+        double sumSquaredError = 0.0;
+        int totalCount = 0;
 
         while (testIterator.hasNext()){
             DataSet ds = testIterator.next();
@@ -105,6 +109,9 @@ public class ModelTraining {
             // Output shape: [batchSize, outputSize, timeSteps]
             INDArray predicted = multiLayerNetwork.output(features, false);
             minMaxScaler.revertLabels(predicted);
+
+            INDArray labels = ds.getLabels();
+            minMaxScaler.revertLabels(labels);
 
             for (int sample = 0; sample < predicted.size(0); sample++) {
                 long timeSteps = predicted.size(2);
@@ -114,17 +121,34 @@ public class ModelTraining {
                         NDArrayIndex.point(timeSteps - 1)
                 );
 
+                INDArray labelLast = labels.get(
+                        NDArrayIndex.point(sample),
+                        NDArrayIndex.all(),
+                        NDArrayIndex.point(timeSteps - 1)
+                );
+
                 List<Double> predictionList = new ArrayList<>();
                 for (int i = 0; i < lastTimeStep.length(); i++){
-                    predictionList.add(lastTimeStep.getDouble(i));
+                    double predValue = lastTimeStep.getDouble(i);
+                    double trueValue = labelLast.getDouble(i);
+                    predictionList.add(predValue);
+
+                    double error = predValue - trueValue;
+                    sumSquaredError += error * error;
+                    totalCount++;
                 }
                 testPredictData.add(predictionList);
             }
         }
 
-        return testPredictData.stream()
+        double mse = totalCount > 0 ? sumSquaredError / totalCount : Double.NaN;
+        log.info("Evaluation MSE: {}", mse);
+
+        List<Double> finalPredictionData = testPredictData.stream()
                 .map(price -> price.get(0))
                 .toList();
+
+        return new TrainingResultVO(finalPredictionData, mse);
     }
 
     private List<List<List<Writable>>> buildSequenceData(int windowSize, List<List<Double>> barPrices) {
