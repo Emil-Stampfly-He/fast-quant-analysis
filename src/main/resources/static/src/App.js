@@ -1,11 +1,12 @@
 import React from 'react';
-import './App.css'
+import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import UserPage from './pages/UserPage';
 import CryptoAnalysisPage from './pages/CryptoAnalysisPage';
 import ModelTrainingPage from './pages/ModelTrainingPage';
+import CodeController from './pages/CodeController';
 
 function App() {
     return (
@@ -17,6 +18,7 @@ function App() {
                     <Route path="/user" element={<UserPage />} />
                     <Route path="/crypto" element={<CryptoAnalysisPage />} />
                     <Route path="/models" element={<ModelTrainingPage />} />
+                    <Route path="/code" element={<CodeController />} /> {/* 新增路由 */}
                 </Routes>
             </div>
         </Router>
@@ -24,3 +26,4 @@ function App() {
 }
 
 export default App;
+
