@@ -43,19 +43,19 @@ const CryptoAnalysisPage = () => {
                 url,
                 data
             });
-            setMessage(`调用 ${endpoint} 成功，返回数据：${JSON.stringify(response.data)}`);
+            setMessage(`Call to ${endpoint} successful, response data: ${JSON.stringify(response.data)}`);
         } catch (error) {
-            setMessage(`调用 ${endpoint} 失败：${error.message}`);
+            setMessage(`Call to ${endpoint} failed: ${error.message}`);
         }
     };
 
     return (
         <div className="container">
-            <h2>数字货币量化分析</h2>
+            <h2>Cryptocurrency Quantitative Analysis</h2>
 
-            {/* Donchian Channel 策略 */}
+            {/* Donchian Channel Strategy */}
             <div className="card">
-                <h3>Donchian Channel 策略</h3>
+                <h3>Donchian Channel Strategy</h3>
                 <input
                     type="text"
                     placeholder="Polygon API Key"
@@ -63,7 +63,7 @@ const CryptoAnalysisPage = () => {
                     onChange={e => setDonchianForm({ ...donchianForm, polygonApiKey: e.target.value })}
                 />
                 <textarea
-                    placeholder="请输入 CryptoAggregatesDTO JSON 数据，包含：tickerName, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit"
+                    placeholder="Please enter CryptoAggregatesDTO JSON data including: tickerName, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit"
                     value={donchianForm.cryptoData}
                     onChange={e => setDonchianForm({ ...donchianForm, cryptoData: e.target.value })}
                     rows={4}
@@ -78,19 +78,19 @@ const CryptoAnalysisPage = () => {
                 />
                 <button onClick={() =>
                     handleSubmit(
-                        '/quant/analysis/crypto/donchian',
+                        'http://localhost:8080/quant/analysis/crypto/donchian',
                         'post',
                         JSON.parse(donchianForm.cryptoData || '{}'),
                         { polygon_api_key: donchianForm.polygonApiKey, windowSize: donchianForm.windowSize }
                     )
                 }>
-                    调用 Donchian 接口
+                    Call Donchian API
                 </button>
             </div>
 
-            {/* Pair Trading 策略 */}
+            {/* Pair Trading Strategy */}
             <div className="card">
-                <h3>Pair Trading 策略</h3>
+                <h3>Pair Trading Strategy</h3>
                 <input
                     type="text"
                     placeholder="Polygon API Key"
@@ -98,7 +98,7 @@ const CryptoAnalysisPage = () => {
                     onChange={e => setPairTradingForm({ ...pairTradingForm, polygonApiKey: e.target.value })}
                 />
                 <textarea
-                    placeholder="请输入 CryptoAggregatesPairDTO JSON 数据，包含：tickerName1, tickerName2, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit"
+                    placeholder="Please enter CryptoAggregatesPairDTO JSON data including: tickerName1, tickerName2, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit"
                     value={pairTradingForm.cryptoPairData}
                     onChange={e => setPairTradingForm({ ...pairTradingForm, cryptoPairData: e.target.value })}
                     rows={4}
@@ -130,7 +130,7 @@ const CryptoAnalysisPage = () => {
                 />
                 <button onClick={() =>
                     handleSubmit(
-                        '/quant/analysis/crypto/pair/trading',
+                        'http://localhost:8080/quant/analysis/crypto/pair/trading',
                         'post',
                         JSON.parse(pairTradingForm.cryptoPairData || '{}'),
                         {
@@ -141,13 +141,13 @@ const CryptoAnalysisPage = () => {
                         }
                     )
                 }>
-                    调用 Pair Trading 接口
+                    Call Pair Trading API
                 </button>
             </div>
 
-            {/* EMA 固定百分比止损策略 */}
+            {/* EMA Fixed Percentage Stop Loss Strategy */}
             <div className="card">
-                <h3>EMA 固定百分比止损策略</h3>
+                <h3>EMA Fixed Percentage Stop Loss Strategy</h3>
                 <input
                     type="text"
                     placeholder="Polygon API Key"
@@ -155,7 +155,7 @@ const CryptoAnalysisPage = () => {
                     onChange={e => setEmaPercentageForm({ ...emaPercentageForm, polygonApiKey: e.target.value })}
                 />
                 <textarea
-                    placeholder="请输入 CryptoAggregatesDTO JSON 数据，包含：tickerName, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit"
+                    placeholder="Please enter CryptoAggregatesDTO JSON data including: tickerName, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit"
                     value={emaPercentageForm.cryptoData}
                     onChange={e => setEmaPercentageForm({ ...emaPercentageForm, cryptoData: e.target.value })}
                     rows={4}
@@ -179,7 +179,7 @@ const CryptoAnalysisPage = () => {
                 />
                 <button onClick={() =>
                     handleSubmit(
-                        '/quant/analysis/crypto/ema/stop/loss/percentage',
+                        'http://localhost:8080/quant/analysis/crypto/ema/stop/loss/percentage',
                         'post',
                         JSON.parse(emaPercentageForm.cryptoData || '{}'),
                         {
@@ -189,13 +189,13 @@ const CryptoAnalysisPage = () => {
                         }
                     )
                 }>
-                    调用 EMA 固定止损接口
+                    Call EMA Fixed Stop Loss API
                 </button>
             </div>
 
-            {/* EMA ATR 止损策略 */}
+            {/* EMA ATR Stop Loss Strategy */}
             <div className="card">
-                <h3>EMA ATR 止损策略</h3>
+                <h3>EMA ATR Stop Loss Strategy</h3>
                 <input
                     type="text"
                     placeholder="Polygon API Key"
@@ -203,7 +203,7 @@ const CryptoAnalysisPage = () => {
                     onChange={e => setEmaATRForm({ ...emaATRForm, polygonApiKey: e.target.value })}
                 />
                 <textarea
-                    placeholder="请输入 CryptoAggregatesDTO JSON 数据，包含：tickerName, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit"
+                    placeholder="Please enter CryptoAggregatesDTO JSON data including: tickerName, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit"
                     value={emaATRForm.cryptoData}
                     onChange={e => setEmaATRForm({ ...emaATRForm, cryptoData: e.target.value })}
                     rows={4}
@@ -235,7 +235,7 @@ const CryptoAnalysisPage = () => {
                 />
                 <button onClick={() =>
                     handleSubmit(
-                        '/quant/analysis/crypto/ema/stop/loss/atr',
+                        'http://localhost:8080/quant/analysis/crypto/ema/stop/loss/atr',
                         'post',
                         JSON.parse(emaATRForm.cryptoData || '{}'),
                         {
@@ -246,7 +246,7 @@ const CryptoAnalysisPage = () => {
                         }
                     )
                 }>
-                    调用 EMA ATR 止损接口
+                    Call EMA ATR Stop Loss API
                 </button>
             </div>
 

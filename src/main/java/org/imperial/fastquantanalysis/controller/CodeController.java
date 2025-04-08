@@ -1,6 +1,7 @@
 package org.imperial.fastquantanalysis.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.imperial.fastquantanalysis.service.ICodeService;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping("/code")
+@Tag(name = "Customized Strategy Code Uploading Interface")
 public class CodeController {
 
     @Resource
@@ -27,6 +29,7 @@ public class CodeController {
      * @param code Customized code snippet
      * @return OK or fail message
      * @postmantest untested
+     * TODO Has BUG
      */
     @PostMapping("/java")
     @ResponseStatus(HttpStatus.OK)
@@ -47,4 +50,6 @@ public class CodeController {
     public ResponseEntity<?> runKotlinCode(@RequestBody String code) {
         return codeService.runKotlinCode(code);
     }
+
+    // TODO Add runPythonCode method
 }

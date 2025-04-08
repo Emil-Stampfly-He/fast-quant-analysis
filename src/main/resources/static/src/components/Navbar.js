@@ -1,13 +1,32 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
+import './Navbar.css';
 
 const Navbar = () => (
-    <nav style={{ padding: '10px', background: '#eee' }}>
-        <Link to="/" style={{ marginRight: '10px' }}>首页</Link>
-        <Link to="/user" style={{ marginRight: '10px' }}>用户管理</Link>
-        <Link to="/crypto" style={{ marginRight: '10px' }}>量化分析</Link>
-        <Link to="/models">模型训练</Link>
-    </nav>
+    <header className="navbar">
+            <div className="navbar-container">
+                    <div className="logo">
+                            <NavLink exact="true" to="/">FastQuant</NavLink>
+                    </div>
+                    <nav className="navbar-links">
+                            <NavLink exact="true" to="/" className="nav-link" activeclassname="active">
+                                    Main
+                            </NavLink>
+                            <NavLink to="/user" className="nav-link" activeclassname="active">
+                                    User Management
+                            </NavLink>
+                            <NavLink to="/crypto" className="nav-link" activeclassname="active">
+                                    Quant Analysis
+                            </NavLink>
+                            <NavLink to="/models" className="nav-link" activeclassname="active">
+                                    Model Training
+                            </NavLink>
+                            <NavLink to="/code" className="nav-link" activeclassname="active">
+                                    Customized Strategy
+                            </NavLink>
+                    </nav>
+            </div>
+    </header>
 );
 
 export default Navbar;

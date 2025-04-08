@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.tools.*;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -79,14 +80,14 @@ public class CodeServiceImpl extends ServiceImpl<CodeMapper, QuantStrategy> impl
      * @return OK or fail message
      * @throws InstantiationException Instantiation exception
      * @throws IllegalAccessException Illegal access exception
-     * @throws java.lang.reflect.InvocationTargetException Invocation target exception
+     * @throws InvocationTargetException Invocation target exception
      * @throws NoSuchMethodException No such method exception
      * @throws StrategyRunningException Strategy running exception
      */
     @NotNull
     private ResponseEntity<?> getResponseEntity(Class<?> strategyClass)
             throws InstantiationException, IllegalAccessException,
-            java.lang.reflect.InvocationTargetException, NoSuchMethodException,
+            InvocationTargetException, NoSuchMethodException,
             StrategyRunningException {
         Object instance = strategyClass.getDeclaredConstructor().newInstance();
 
@@ -120,34 +121,41 @@ public class CodeServiceImpl extends ServiceImpl<CodeMapper, QuantStrategy> impl
         return ResponseEntity.ok(finalStrategy);
     }
 
-    private Class<?> compileJavaSource(String sourceCode) throws Exception {
-        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        if (compiler == null) {
-            throw new IllegalStateException("JDK compiler not available. Please check and refresh the page.");
+    private Class<?> compileJavaSource(String sourceCode) {
+        Class<?> userStrategy = null;
+        try {
+            JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+            if (compiler == null) {
+                throw new IllegalStateException("JDK compiler not available. Please check and refresh the page.");
+            }
+
+            InMemoryJavaFileObject fileObject = new InMemoryJavaFileObject("UserStrategy", sourceCode);
+            DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+            StandardJavaFileManager standardFileManager = compiler.getStandardFileManager(diagnostics, null, null);
+            List<String> optionList = Arrays.asList("-classpath", System.getProperty("java.class.path"));
+            JavaCompiler.CompilationTask task = compiler.getTask(
+                    null,
+                    standardFileManager,
+                    diagnostics,
+                    optionList,
+                    null,
+                    List.of(fileObject)
+            );
+
+            boolean success = task.call();
+            if (!success) {
+                StringBuilder errorMsg = new StringBuilder();
+                diagnostics.getDiagnostics().forEach(d -> errorMsg.append(d.toString()).append("\n"));
+                throw new IllegalArgumentException("Failed to compile: \n" + errorMsg);
+            }
+
+            InMemoryClassLoader classLoader = new InMemoryClassLoader();
+            userStrategy = classLoader.loadClass("org.imperial.fastquantanalysis.strategy.UserStrategy");
+        } catch (ClassNotFoundException e) {
+            log.error("Failed to compile Java source: ", e);
         }
-
-        InMemoryJavaFileObject fileObject = new InMemoryJavaFileObject("UserStrategy", sourceCode);
-        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-        StandardJavaFileManager standardFileManager = compiler.getStandardFileManager(diagnostics, null, null);
-
-        JavaCompiler.CompilationTask task = compiler.getTask(
-                null,
-                standardFileManager,
-                diagnostics,
-                null,
-                null,
-                List.of(fileObject)
-        );
-
-        boolean success = task.call();
-        if (!success) {
-            StringBuilder errorMsg = new StringBuilder();
-            diagnostics.getDiagnostics().forEach(d -> errorMsg.append(d.toString()).append("\n"));
-            throw new IllegalArgumentException("Failed to compile: \n" + errorMsg);
-        }
-
-        InMemoryClassLoader classLoader = new InMemoryClassLoader();
-        return classLoader.loadClass("UserStrategy");
+        
+        return userStrategy;
     }
 
     private Class<?> compileKotlinSource(String sourceCode) throws Exception {

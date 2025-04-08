@@ -10,7 +10,7 @@ const UserPage = () => {
 
     const sendCode = async () => {
         try {
-            await apiClient.post(`/user/code?email_id=${encodeURIComponent(email)}`);
+            await apiClient.post(`http://localhost:8080/user/code?email_id=${encodeURIComponent(email)}`);
             setMessage('Verification code sent successfully.');
         } catch (error) {
             setMessage('Failed to send verification code.');
@@ -19,7 +19,7 @@ const UserPage = () => {
 
     const login = async () => {
         try {
-            await apiClient.post('/user/login', loginData);
+            await apiClient.post('http://localhost:8080/user/login', loginData);
             setMessage('Logged in successfully.');
         } catch (error) {
             setMessage('Failed to log in.');
@@ -28,7 +28,7 @@ const UserPage = () => {
 
     const updateUser = async () => {
         try {
-            await apiClient.put('/user/update', updateData);
+            await apiClient.put('http://localhost:8080/user/update', updateData);
             setMessage('User information updated successfully.');
         } catch (error) {
             setMessage('Failed to update user information.');
@@ -37,7 +37,7 @@ const UserPage = () => {
 
     const fetchUserInfo = async () => {
         try {
-            const response = await apiClient.get('/user/me');
+            const response = await apiClient.get('http://localhost:8080/user/me');
             setUserInfo(response.data);
             setMessage('User information retrieved successfully.');
         } catch (error) {

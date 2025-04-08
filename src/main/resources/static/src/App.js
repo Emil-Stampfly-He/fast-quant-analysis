@@ -18,7 +18,7 @@ function App() {
                     <Route path="/user" element={<UserPage />} />
                     <Route path="/crypto" element={<CryptoAnalysisPage />} />
                     <Route path="/models" element={<ModelTrainingPage />} />
-                    <Route path="/code" element={<CodeController />} /> {/* 新增路由 */}
+                    <Route path="/code" element={<CodeController />} />
                 </Routes>
             </div>
         </Router>

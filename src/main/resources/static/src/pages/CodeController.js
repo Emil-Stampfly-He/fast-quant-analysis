@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './App.css';
 
 const CodeController = () => {
     const [language, setLanguage] = useState("Java");
@@ -7,17 +6,17 @@ const CodeController = () => {
     const [output, setOutput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    // 根据选择的语言确定请求的后端 API 地址
+    // Determine backend API endpoint based on selected language
     const getEndpoint = (lang) => {
         switch(lang) {
             case "Java":
-                return "/api/upload-strategy";
+                return "http://localhost:8080/code/java";
             case "Kotlin":
-                return "/api/upload-strategy-kotlin";
+                return "http://localhost:8080/code/kotlin";
             case "Python":
-                return "/api/upload-strategy-python";
+                return "http://localhost:8080/code/python";
             default:
-                return "/api/upload-strategy";
+                return "http://localhost:8080/code/java";
         }
     };
 
@@ -44,9 +43,9 @@ const CodeController = () => {
     return (
         <div className="container">
             <div className="card">
-                <h3>在线代码运行</h3>
+                <h3>Online Code Execution</h3>
                 <div>
-                    <label htmlFor="language-select">选择语言:</label>
+                    <label htmlFor="language-select">Select Language:</label>
                     <select
                         id="language-select"
                         value={language}
@@ -58,17 +57,17 @@ const CodeController = () => {
                     </select>
                 </div>
                 <textarea
-                    placeholder="请输入你的代码..."
+                    placeholder="Please enter your code here..."
                     rows="15"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                 ></textarea>
                 <button onClick={handleRunCode} disabled={isLoading}>
-                    {isLoading ? "运行中..." : "运行代码"}
+                    {isLoading ? "Running..." : "Run Code"}
                 </button>
                 {output && (
                     <div className="message">
-                        <h4>执行结果:</h4>
+                        <h4>Execution Result:</h4>
                         <pre>{output}</pre>
                     </div>
                 )}

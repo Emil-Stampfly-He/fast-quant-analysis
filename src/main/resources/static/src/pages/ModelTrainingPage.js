@@ -5,7 +5,7 @@ const ModelTrainingPage = () => {
     const [defaultForm, setDefaultForm] = useState({
         polygonApiKey: '',
         cryptoData: '',
-        modelKind: '', // 可选值：LSTM_RNN, LSTM_DENSE_RNN, CNN_RNN_HYBRID
+        modelKind: '', // Available options: LSTM_RNN, LSTM_DENSE_RNN, CNN_RNN_HYBRID
         windowSize: 20,
         epochs: 10,
         inputSize: 10,
@@ -15,7 +15,7 @@ const ModelTrainingPage = () => {
     const [customizedForm, setCustomizedForm] = useState({
         polygonApiKey: '',
         cryptoData: '',
-        modelKind: '', // 仅支持 LSTM_RNN 或 LSTM_DENSE_RNN
+        modelKind: '', // Only supports LSTM_RNN or LSTM_DENSE_RNN
         seed: 12345,
         learningRate: 0.001,
         momentum: 0.9,
@@ -29,7 +29,7 @@ const ModelTrainingPage = () => {
     const [cnnRnnForm, setCnnRnnForm] = useState({
         polygonApiKey: '',
         cryptoData: '',
-        modelKind: '', // 仅支持 CNN_RNN_HYBRID
+        modelKind: '', // Only supports CNN_RNN_HYBRID
         seed: 12345,
         learningRate: 0.001,
         numFeatures: 10,
@@ -57,19 +57,19 @@ const ModelTrainingPage = () => {
                 url += '?' + queryString;
             }
             const response = await apiClient.post(url, JSON.parse(formData));
-            setMessage(`调用 ${endpoint} 成功，返回数据：${JSON.stringify(response.data)}`);
+            setMessage(`Call to ${endpoint} successful, response data: ${JSON.stringify(response.data)}`);
         } catch (error) {
-            setMessage(`调用 ${endpoint} 失败：${error.message}`);
+            setMessage(`Call to ${endpoint} failed: ${error.message}`);
         }
     };
 
     return (
         <div className="container">
-            <h2>模型训练</h2>
+            <h2>Model Training</h2>
 
-            {/* 训练默认模型 */}
+            {/* Default Model Training */}
             <div className="card">
-                <h3>训练默认模型</h3>
+                <h3>Train Default Model</h3>
                 <input
                     type="text"
                     placeholder="Polygon API Key"
@@ -77,7 +77,7 @@ const ModelTrainingPage = () => {
                     onChange={e => setDefaultForm({ ...defaultForm, polygonApiKey: e.target.value })}
                 />
                 <textarea
-                    placeholder="请输入 CryptoAggregatesDTO JSON 数据，包含：tickerName, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit"
+                    placeholder="Please enter CryptoAggregatesDTO JSON data including: tickerName, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit"
                     value={defaultForm.cryptoData}
                     onChange={e => setDefaultForm({ ...defaultForm, cryptoData: e.target.value })}
                     rows={4}
@@ -114,7 +114,7 @@ const ModelTrainingPage = () => {
                 />
                 <button onClick={() =>
                     handleSubmit(
-                        '/models/default',
+                        'http://localhost:8080/models/default',
                         defaultForm.cryptoData,
                         {
                             polygon_api_key: defaultForm.polygonApiKey,
@@ -126,13 +126,13 @@ const ModelTrainingPage = () => {
                         }
                     )
                 }>
-                    训练默认模型
+                    Train Default Model
                 </button>
             </div>
 
-            {/* 训练定制模型 */}
+            {/* Customized Model Training */}
             <div className="card">
-                <h3>训练定制模型</h3>
+                <h3>Train Customized LSTM-RNN or LSTM-Dense-RNN Model</h3>
                 <input
                     type="text"
                     placeholder="Polygon API Key"
@@ -140,14 +140,14 @@ const ModelTrainingPage = () => {
                     onChange={e => setCustomizedForm({ ...customizedForm, polygonApiKey: e.target.value })}
                 />
                 <textarea
-                    placeholder="请输入 CryptoAggregatesDTO JSON 数据，包含：tickerName, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit"
+                    placeholder="Please enter CryptoAggregatesDTO JSON data including: tickerName, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit"
                     value={customizedForm.cryptoData}
                     onChange={e => setCustomizedForm({ ...customizedForm, cryptoData: e.target.value })}
                     rows={4}
                 />
                 <input
                     type="text"
-                    placeholder="Model Kind (仅支持 LSTM_RNN 或 LSTM_DENSE_RNN)"
+                    placeholder="Model Kind (Only supports LSTM_RNN or LSTM_DENSE_RNN)"
                     value={customizedForm.modelKind}
                     onChange={e => setCustomizedForm({ ...customizedForm, modelKind: e.target.value })}
                 />
@@ -204,7 +204,7 @@ const ModelTrainingPage = () => {
                 />
                 <button onClick={() =>
                     handleSubmit(
-                        '/models/customized',
+                        'http://localhost:8080/models/customized',
                         customizedForm.cryptoData,
                         {
                             polygon_api_key: customizedForm.polygonApiKey,
@@ -220,13 +220,13 @@ const ModelTrainingPage = () => {
                         }
                     )
                 }>
-                    训练定制模型
+                    Train Customized Model
                 </button>
             </div>
 
-            {/* 训练 CNN-RNN Hybrid 定制模型 */}
+            {/* CNN-RNN Hybrid Model Training */}
             <div className="card">
-                <h3>训练 CNN-RNN Hybrid 定制模型</h3>
+                <h3>Train CNN-RNN Hybrid Model</h3>
                 <input
                     type="text"
                     placeholder="Polygon API Key"
@@ -234,14 +234,14 @@ const ModelTrainingPage = () => {
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, polygonApiKey: e.target.value })}
                 />
                 <textarea
-                    placeholder="请输入 CryptoAggregatesDTO JSON 数据，包含：tickerName, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit"
+                    placeholder="Please enter CryptoAggregatesDTO JSON data including: tickerName, timespan, fromDate, toDate, sort, multiplier, unadjusted, limit"
                     value={cnnRnnForm.cryptoData}
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, cryptoData: e.target.value })}
                     rows={4}
                 />
                 <input
                     type="text"
-                    placeholder="Model Kind (仅支持 CNN_RNN_HYBRID)"
+                    placeholder="Model Kind (Only supports CNN_RNN_HYBRID)"
                     value={cnnRnnForm.modelKind}
                     onChange={e => setCnnRnnForm({ ...cnnRnnForm, modelKind: e.target.value })}
                 />
@@ -328,7 +328,7 @@ const ModelTrainingPage = () => {
                 />
                 <button onClick={() =>
                     handleSubmit(
-                        '/models/customized/cnn-rnn-hybrid',
+                        'http://localhost:8080/models/customized/cnn-rnn-hybrid',
                         cnnRnnForm.cryptoData,
                         {
                             polygon_api_key: cnnRnnForm.polygonApiKey,
@@ -349,7 +349,7 @@ const ModelTrainingPage = () => {
                         }
                     )
                 }>
-                    训练 CNN-RNN Hybrid 模型
+                    Train CNN-RNN Hybrid Model
                 </button>
             </div>
 
