@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  * @since 2025-03-21
  */
 @Slf4j
-public class CryptoHttpClientUtil {
+public class PricesHttpClientUtil {
 
     /**
      * Get the link object to Polygon.io
@@ -143,7 +143,7 @@ public class CryptoHttpClientUtil {
 
         );
 
-        barPricesWithVolume.forEach(CryptoHttpClientUtil::replaceNullWithPrevious);
+        barPricesWithVolume.forEach(PricesHttpClientUtil::replaceNullWithPrevious);
 
         return barPricesWithVolume;
     }
@@ -188,7 +188,7 @@ public class CryptoHttpClientUtil {
                 results.stream().map(AggregateDTO::getClose).collect(Collectors.toList()) // 3: close prices
         );
 
-        barPrices.forEach(CryptoHttpClientUtil::replaceNullWithPrevious);
+        barPrices.forEach(PricesHttpClientUtil::replaceNullWithPrevious);
 
         return barPrices;
     }

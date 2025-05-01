@@ -8,7 +8,7 @@ import org.imperial.fastquantanalysis.constant.Sort;
 import org.imperial.fastquantanalysis.constant.Timespan;
 import org.imperial.fastquantanalysis.model.ModelConfig;
 import org.imperial.fastquantanalysis.model.ModelTraining;
-import org.imperial.fastquantanalysis.util.CryptoHttpClientUtil;
+import org.imperial.fastquantanalysis.util.PricesHttpClientUtil;
 import org.imperial.fastquantanalysis.vo.TrainingResultVO;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,13 +30,13 @@ public class ModelTest {
 
     @Test
     void testLSTMModel() {
-        HttpClientProvider okHttpClientProvider = CryptoHttpClientUtil.getOkHttpClientProvider();
+        HttpClientProvider okHttpClientProvider = PricesHttpClientUtil.getOkHttpClientProvider();
         PolygonRestClient polygonClient = new PolygonRestClient(
                 POLYGON_API_KEY,
                 okHttpClientProvider
         );
 
-        List<List<Double>> barPrices = CryptoHttpClientUtil.getBarPrices(
+        List<List<Double>> barPrices = PricesHttpClientUtil.getBarPrices(
                 "X:BTCUSD",
                 null,
                 Timespan.DAY,

@@ -10,7 +10,7 @@ import okhttp3.Response;
 import org.imperial.fastquantanalysis.constant.Sort;
 import org.imperial.fastquantanalysis.constant.Timespan;
 import org.imperial.fastquantanalysis.factory.AggregatesParametersFactory;
-import org.imperial.fastquantanalysis.util.CryptoHttpClientUtil;
+import org.imperial.fastquantanalysis.util.PricesHttpClientUtil;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -23,13 +23,13 @@ import static org.imperial.fastquantanalysis.constant.PolygonConstant.POLYGON_AP
 
 public class JavaCryptoGettingPriceRestApiTest {
     public static void main(String[] args) {
-        HttpClientProvider okHttpClientProvider = CryptoHttpClientUtil.getOkHttpClientProvider();
+        HttpClientProvider okHttpClientProvider = PricesHttpClientUtil.getOkHttpClientProvider();
         PolygonRestClient polygonClient = new PolygonRestClient(
                 POLYGON_API_KEY, // To be changed to user's
                 okHttpClientProvider
         );
 
-//        List<Double> closePrices = CryptoHttpClientUtil.getClosePrices(
+//        List<Double> closePrices = PricesHttpClientUtil.getClosePrices(
 //                "X:BTCUSD",
 //                null,
 //                Timespan.DAY,
@@ -41,7 +41,7 @@ public class JavaCryptoGettingPriceRestApiTest {
 //                polygonClient
 //        );
 
-        List<List<Double>> barPrices = CryptoHttpClientUtil.getBarPrices(
+        List<List<Double>> barPrices = PricesHttpClientUtil.getBarPrices(
                 "X:ETHUSD", // X:BTCUSD
                 null,
                 Timespan.DAY,

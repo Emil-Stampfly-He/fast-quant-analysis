@@ -1,8 +1,6 @@
 package org.imperial.fastquantanalysis.polygon.kotlin.stocks
 
 import io.polygon.kotlin.sdk.rest.*
-import io.polygon.kotlin.sdk.rest.reference.*
-import io.polygon.kotlin.sdk.rest.stocks.GainersOrLosersDirection
 
 /**
  * Credit to <a href="https://github.com/polygon-io/client-jvm">https://github.com/polygon-io/client-jvm</a>

@@ -10,7 +10,7 @@ import org.imperial.fastquantanalysis.dto.CryptoAggregatesDTO;
 import org.imperial.fastquantanalysis.model.ModelConfig;
 import org.imperial.fastquantanalysis.model.ModelTraining;
 import org.imperial.fastquantanalysis.service.IModelTrainingService;
-import org.imperial.fastquantanalysis.util.CryptoHttpClientUtil;
+import org.imperial.fastquantanalysis.util.PricesHttpClientUtil;
 import org.imperial.fastquantanalysis.vo.TrainingResultVO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -54,13 +54,13 @@ public class ModelTrainingServiceImpl implements IModelTrainingService {
                                                        CryptoAggregatesDTO cryptoAggregatesDTO,
                                                        ModelKind modelKind, int windowSize, int epochs,
                                                        int inputSize, int outPutSize) {
-        HttpClientProvider okHttpClientProvider = CryptoHttpClientUtil.getOkHttpClientProvider();
+        HttpClientProvider okHttpClientProvider = PricesHttpClientUtil.getOkHttpClientProvider();
         PolygonRestClient polygonRestClient = new PolygonRestClient(
                 polygonApiKey,
                 okHttpClientProvider
         );
 
-        List<List<Double>> barPrices = CryptoHttpClientUtil.getBarPrices(
+        List<List<Double>> barPrices = PricesHttpClientUtil.getBarPrices(
                 cryptoAggregatesDTO.getTickerName(),
                 cryptoAggregatesDTO.getMultiplier(),
                 cryptoAggregatesDTO.getTimespan(),
@@ -103,13 +103,13 @@ public class ModelTrainingServiceImpl implements IModelTrainingService {
                                                                  ModelKind modelKind, long seed, double learningRate,
                                                                  double momentum, double dropoutRate, int windowSize,
                                                                  int epochs, int inputSize, int outPutSize) {
-        HttpClientProvider okHttpClientProvider = CryptoHttpClientUtil.getOkHttpClientProvider();
+        HttpClientProvider okHttpClientProvider = PricesHttpClientUtil.getOkHttpClientProvider();
         PolygonRestClient polygonRestClient = new PolygonRestClient(
                 polygonApiKey,
                 okHttpClientProvider
         );
 
-        List<List<Double>> barPrices = CryptoHttpClientUtil.getBarPrices(
+        List<List<Double>> barPrices = PricesHttpClientUtil.getBarPrices(
                 cryptoAggregatesDTO.getTickerName(),
                 cryptoAggregatesDTO.getMultiplier(),
                 cryptoAggregatesDTO.getTimespan(),
@@ -168,13 +168,13 @@ public class ModelTrainingServiceImpl implements IModelTrainingService {
                                                               double momentum, double dropoutRate,
                                                               int timeSteps, int epochs, int outPutSize,
                                                               int windowSize) {
-        HttpClientProvider okHttpClientProvider = CryptoHttpClientUtil.getOkHttpClientProvider();
+        HttpClientProvider okHttpClientProvider = PricesHttpClientUtil.getOkHttpClientProvider();
         PolygonRestClient polygonRestClient = new PolygonRestClient(
                 polygonApiKey,
                 okHttpClientProvider
         );
 
-        List<List<Double>> barPrices = CryptoHttpClientUtil.getBarPrices(
+        List<List<Double>> barPrices = PricesHttpClientUtil.getBarPrices(
                 cryptoAggregatesDTO.getTickerName(),
                 cryptoAggregatesDTO.getMultiplier(),
                 cryptoAggregatesDTO.getTimespan(),

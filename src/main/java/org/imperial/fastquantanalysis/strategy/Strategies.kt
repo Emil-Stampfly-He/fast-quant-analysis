@@ -18,7 +18,7 @@ import kotlin.math.sqrt
  * @since 2025-03-20
  */
 @Component
-class CryptoStrategy (
+class Strategies (
     @Resource
     private val redisIdUtil: RedisIdUtil
 ) {

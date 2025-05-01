@@ -14,8 +14,8 @@ import org.imperial.fastquantanalysis.dto.CryptoAggregatesPairDTO;
 import org.imperial.fastquantanalysis.entity.QuantStrategy;
 import org.imperial.fastquantanalysis.mapper.QuantAnalysisCryptoMapper;
 import org.imperial.fastquantanalysis.service.IQuantAnalysisCryptoService;
-import org.imperial.fastquantanalysis.strategy.CryptoStrategy;
-import org.imperial.fastquantanalysis.util.CryptoHttpClientUtil;
+import org.imperial.fastquantanalysis.strategy.Strategies;
+import org.imperial.fastquantanalysis.util.PricesHttpClientUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -38,7 +38,7 @@ import java.util.stream.IntStream;
 public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCryptoMapper, QuantStrategy> implements IQuantAnalysisCryptoService {
 
     @Resource
-    private CryptoStrategy cryptoStrategy;
+    private Strategies strategies;
 
     @Resource
     private KafkaTemplate<String, QuantStrategy> kafkaTemplate;
@@ -70,20 +70,20 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
         Boolean unadjusted = cryptoAggregatesDTO.getUnadjusted();
         Long limit = cryptoAggregatesDTO.getLimit();
 
-        HttpClientProvider okHttpClientProvider = CryptoHttpClientUtil.getOkHttpClientProvider();
+        HttpClientProvider okHttpClientProvider = PricesHttpClientUtil.getOkHttpClientProvider();
         PolygonRestClient polygonRestClient = new PolygonRestClient(
                 polygonApiKey,
                 okHttpClientProvider
         );
 
-        List<Double> closePrices = CryptoHttpClientUtil.getClosePrices(
+        List<Double> closePrices = PricesHttpClientUtil.getClosePrices(
                 tickerName, multiplier,
                 timespan, fromDate, toDate,
                 unadjusted, limit, sort,
                 polygonRestClient
         );
 
-        QuantStrategy quantStrategy = cryptoStrategy.donchianChannel(closePrices, windowSize);
+        QuantStrategy quantStrategy = strategies.donchianChannel(closePrices, windowSize);
         quantStrategy.setStartDate(fromDate.atStartOfDay());
         quantStrategy.setEndDate(toDate.atStartOfDay());
 
@@ -105,10 +105,10 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
     @Override
     public CompletableFuture<ResponseEntity<QuantStrategy>> pairTrading(String polygonApiKey, CryptoAggregatesPairDTO cryptoAggregatesPairDTO,
                                                             Integer windowSize, Double zScoreThreshold, Integer x) {
-        PolygonRestClient polygonRestClient = new PolygonRestClient(polygonApiKey, CryptoHttpClientUtil.getOkHttpClientProvider());
+        PolygonRestClient polygonRestClient = new PolygonRestClient(polygonApiKey, PricesHttpClientUtil.getOkHttpClientProvider());
 
         CompletableFuture<List<List<Double>>> future1 = CompletableFuture.supplyAsync(() ->
-                CryptoHttpClientUtil.getBarPrices(
+                PricesHttpClientUtil.getBarPrices(
                         cryptoAggregatesPairDTO.getTickerName1(),
                         cryptoAggregatesPairDTO.getMultiplier(),
                         cryptoAggregatesPairDTO.getTimespan(),
@@ -122,7 +122,7 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
         );
 
         CompletableFuture<List<List<Double>>> future2 = CompletableFuture.supplyAsync(() ->
-                CryptoHttpClientUtil.getBarPrices(
+                PricesHttpClientUtil.getBarPrices(
                         cryptoAggregatesPairDTO.getTickerName2(),
                         cryptoAggregatesPairDTO.getMultiplier(),
                         cryptoAggregatesPairDTO.getTimespan(),
@@ -144,7 +144,7 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
                     .mapToDouble(i -> barPrices2.stream().mapToDouble(list -> list.get(i)).average().orElse(0))
                     .boxed().toList();
 
-            QuantStrategy quantStrategy = cryptoStrategy.pairTrading(avgBarPrice1, avgBarPrice2, windowSize, zScoreThreshold, x);
+            QuantStrategy quantStrategy = strategies.pairTrading(avgBarPrice1, avgBarPrice2, windowSize, zScoreThreshold, x);
             quantStrategy.setStartDate(cryptoAggregatesPairDTO.getFromDate().atStartOfDay());
             quantStrategy.setEndDate(cryptoAggregatesPairDTO.getToDate().atStartOfDay());
 
@@ -174,13 +174,13 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
         Boolean unadjusted = cryptoAggregatesDTO.getUnadjusted();
         Long limit = cryptoAggregatesDTO.getLimit();
 
-        HttpClientProvider okHttpClientProvider = CryptoHttpClientUtil.getOkHttpClientProvider();
+        HttpClientProvider okHttpClientProvider = PricesHttpClientUtil.getOkHttpClientProvider();
         PolygonRestClient polygonRestClient = new PolygonRestClient(
                 polygonApiKey,
                 okHttpClientProvider
         );
 
-        List<List<Double>> barPrices = CryptoHttpClientUtil.getBarPrices(
+        List<List<Double>> barPrices = PricesHttpClientUtil.getBarPrices(
                 tickerName, multiplier,
                 timespan, fromDate, toDate,
                 unadjusted, limit, sort,
@@ -194,7 +194,7 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
                 .boxed()
                 .toList();
 
-        QuantStrategy quantStrategy = cryptoStrategy.emaWithStopLossPercentage(closePrices, avgBarPrice, emaPeriod, stopLossPercentage);
+        QuantStrategy quantStrategy = strategies.emaWithStopLossPercentage(closePrices, avgBarPrice, emaPeriod, stopLossPercentage);
         quantStrategy.setStartDate(fromDate.atStartOfDay());
         quantStrategy.setEndDate(toDate.atStartOfDay());
 
@@ -216,20 +216,20 @@ public class QuantAnalysisCryptoServiceImpl extends ServiceImpl<QuantAnalysisCry
         Boolean unadjusted = cryptoAggregatesDTO.getUnadjusted();
         Long limit = cryptoAggregatesDTO.getLimit();
 
-        HttpClientProvider okHttpClientProvider = CryptoHttpClientUtil.getOkHttpClientProvider();
+        HttpClientProvider okHttpClientProvider = PricesHttpClientUtil.getOkHttpClientProvider();
         PolygonRestClient polygonRestClient = new PolygonRestClient(
                 polygonApiKey,
                 okHttpClientProvider
         );
 
-        List<List<Double>> barPrices = CryptoHttpClientUtil.getBarPrices(
+        List<List<Double>> barPrices = PricesHttpClientUtil.getBarPrices(
                 tickerName, multiplier,
                 timespan, fromDate, toDate,
                 unadjusted, limit, sort,
                 polygonRestClient
         );
 
-        QuantStrategy quantStrategy = cryptoStrategy.emaWithATRStopLoss(barPrices, emaPeriod, atrPeriod, atrMultiplier);
+        QuantStrategy quantStrategy = strategies.emaWithATRStopLoss(barPrices, emaPeriod, atrPeriod, atrMultiplier);
         quantStrategy.setStartDate(fromDate.atStartOfDay());
         quantStrategy.setEndDate(toDate.atStartOfDay());
 
