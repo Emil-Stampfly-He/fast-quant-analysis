@@ -353,7 +353,7 @@ class Strategies (
     }
 
     /**
-     * EMA with dynamic stol loss strategy using ATR for crypto prices
+     * EMA with dynamic stop loss strategy using ATR for crypto prices
      * @param barPrices bar price list
      * @param emaPeriod EMA window size
      * @param atrPeriod ATR window size

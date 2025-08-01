@@ -1,4 +1,4 @@
-# Fast Quant Analysis Platform (WIP) 
+# Fast Quant Analysis Platform
 Claim: This is the graduation project for Imperial College London MSc Financial Technology.
 
 ## Idea about this project

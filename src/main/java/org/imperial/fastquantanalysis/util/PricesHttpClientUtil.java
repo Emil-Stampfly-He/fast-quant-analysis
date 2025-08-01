@@ -193,9 +193,6 @@ public class PricesHttpClientUtil {
         return barPrices;
     }
 
-    // TODO Add methods to get secondly, minutely, hourly, monthly, quarterly and yearly prices
-
-    // TODO This method should be made more robust
     private static void replaceNullWithPrevious(List<Double> list) {
         if (list.isEmpty() || list.size() == 1) {
             return;

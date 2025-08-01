@@ -29,7 +29,6 @@ public class CodeController {
      * @param code Customized code snippet
      * @return OK or fail message
      * @postmantest untested
-     * TODO Has BUG
      */
     @PostMapping("/java")
     @ResponseStatus(HttpStatus.OK)
@@ -50,6 +49,4 @@ public class CodeController {
     public ResponseEntity<?> runKotlinCode(@RequestBody String code) {
         return codeService.runKotlinCode(code);
     }
-
-    // TODO Add runPythonCode method
 }

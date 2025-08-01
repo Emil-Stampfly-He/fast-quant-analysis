@@ -40,7 +40,6 @@ public class ModelTraining {
      * @param modelProvider model
      * @param epochs epochs
      * @return Training result
-     * TODO Add function of saving the model to NoSQL database
      */
     public TrainingResultVO train(int windowSize, List<List<Double>> dataList,
                               Supplier<MultiLayerNetwork> modelProvider, int epochs) {
@@ -85,18 +84,14 @@ public class ModelTraining {
         testIterator.setPreProcessor(minMaxScaler);
 
         // Load the model
-        // TODO Add the model of uploading the pre-trained model from NoSQL database
-        // TODO 1. Load the model (from NoSQL database)
         MultiLayerNetwork multiLayerNetwork = modelProvider.get();
         multiLayerNetwork.setListeners(new ScoreIterationListener(SCORE_ITERATIONS));
-        // TODO 2. Save the model's information
 
         // Train the model
         long startTime = System.currentTimeMillis();
         multiLayerNetwork.fit(trainIterator, epochs);
         long endTime = System.currentTimeMillis();
         log.info("Training took {} ms", endTime - startTime);
-        // TODO 3. Save the model to NoSQL database
 
         // Test the model
         List<List<Double>> testPredictData = new ArrayList<>();
